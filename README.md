@@ -6,6 +6,10 @@ uvp 是一个与 AI 工作流耦合的项目管理脚手架。它把**特性**�
 
 Rust 编译，单文件分发，不依赖运行时，支持 Windows / macOS / Linux。
 
+## 项目框架
+
+![uvp 工作流框架](.uvp/workflow.drawio.svg)
+
 ## 解决什么问题
 
 1. **特性生命周期混乱** — AI 分不清当前事实和历史废案，上下文越来越脏
@@ -169,6 +173,5 @@ uvp 内置 4 个 AI Skill，通过 `uvp ide` 部署到项目中，AI 每次对�
 
 ## 技术栈
 
-- **语言**：Rust 2024
-- **分发**：单文件二进制，模板通过 `include_str!` 编译时内嵌
+- **语言**：Rust（Edition 2024），单文件二进制，模板通过 `include_str!` 编译时内嵌
 - **平台**：Windows / macOS / Linux
