@@ -1,0 +1,13 @@
+site_name: ai-uvp
+theme:
+  name: material
+  language: zh
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - search.suggest
+    - search.highlight
+nav:
+  - PRD: PRD/
+  - ADR: ADR/

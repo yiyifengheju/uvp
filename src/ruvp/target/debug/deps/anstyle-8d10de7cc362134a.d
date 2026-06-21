@@ -1,0 +1,12 @@
+G:\600_PycharmProjects\ai-uvp\src\ruvp\target\debug\deps\anstyle-8d10de7cc362134a.d: C:\Users\mastermao\.cargo\registry\src\rsproxy.cn-e3de039b2554c837\anstyle-1.0.14\src\lib.rs C:\Users\mastermao\.cargo\registry\src\rsproxy.cn-e3de039b2554c837\anstyle-1.0.14\src\macros.rs C:\Users\mastermao\.cargo\registry\src\rsproxy.cn-e3de039b2554c837\anstyle-1.0.14\src\color.rs C:\Users\mastermao\.cargo\registry\src\rsproxy.cn-e3de039b2554c837\anstyle-1.0.14\src\effect.rs C:\Users\mastermao\.cargo\registry\src\rsproxy.cn-e3de039b2554c837\anstyle-1.0.14\src\reset.rs C:\Users\mastermao\.cargo\registry\src\rsproxy.cn-e3de039b2554c837\anstyle-1.0.14\src\style.rs
+
+G:\600_PycharmProjects\ai-uvp\src\ruvp\target\debug\deps\libanstyle-8d10de7cc362134a.rlib: C:\Users\mastermao\.cargo\registry\src\rsproxy.cn-e3de039b2554c837\anstyle-1.0.14\src\lib.rs C:\Users\mastermao\.cargo\registry\src\rsproxy.cn-e3de039b2554c837\anstyle-1.0.14\src\macros.rs C:\Users\mastermao\.cargo\registry\src\rsproxy.cn-e3de039b2554c837\anstyle-1.0.14\src\color.rs C:\Users\mastermao\.cargo\registry\src\rsproxy.cn-e3de039b2554c837\anstyle-1.0.14\src\effect.rs C:\Users\mastermao\.cargo\registry\src\rsproxy.cn-e3de039b2554c837\anstyle-1.0.14\src\reset.rs C:\Users\mastermao\.cargo\registry\src\rsproxy.cn-e3de039b2554c837\anstyle-1.0.14\src\style.rs
+
+G:\600_PycharmProjects\ai-uvp\src\ruvp\target\debug\deps\libanstyle-8d10de7cc362134a.rmeta: C:\Users\mastermao\.cargo\registry\src\rsproxy.cn-e3de039b2554c837\anstyle-1.0.14\src\lib.rs C:\Users\mastermao\.cargo\registry\src\rsproxy.cn-e3de039b2554c837\anstyle-1.0.14\src\macros.rs C:\Users\mastermao\.cargo\registry\src\rsproxy.cn-e3de039b2554c837\anstyle-1.0.14\src\color.rs C:\Users\mastermao\.cargo\registry\src\rsproxy.cn-e3de039b2554c837\anstyle-1.0.14\src\effect.rs C:\Users\mastermao\.cargo\registry\src\rsproxy.cn-e3de039b2554c837\anstyle-1.0.14\src\reset.rs C:\Users\mastermao\.cargo\registry\src\rsproxy.cn-e3de039b2554c837\anstyle-1.0.14\src\style.rs
+
+C:\Users\mastermao\.cargo\registry\src\rsproxy.cn-e3de039b2554c837\anstyle-1.0.14\src\lib.rs:
+C:\Users\mastermao\.cargo\registry\src\rsproxy.cn-e3de039b2554c837\anstyle-1.0.14\src\macros.rs:
+C:\Users\mastermao\.cargo\registry\src\rsproxy.cn-e3de039b2554c837\anstyle-1.0.14\src\color.rs:
+C:\Users\mastermao\.cargo\registry\src\rsproxy.cn-e3de039b2554c837\anstyle-1.0.14\src\effect.rs:
+C:\Users\mastermao\.cargo\registry\src\rsproxy.cn-e3de039b2554c837\anstyle-1.0.14\src\reset.rs:
+C:\Users\mastermao\.cargo\registry\src\rsproxy.cn-e3de039b2554c837\anstyle-1.0.14\src\style.rs:

@@ -1,0 +1,20 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "uv-plus"
+version = "2026.6.0"
+description = "uv plus extension - Vibe Coding project initialization and workflow tool"
+requires-python = ">=3.10"
+classifiers = [
+    "Operating System :: OS Independent",
+    "Environment :: Console",
+    "Topic :: Software Development :: Build Tools",
+]
+
+[project.scripts]
+uvp = "uv_plus:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["python/uv_plus"]

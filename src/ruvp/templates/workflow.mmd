@@ -1,0 +1,9 @@
+graph LR
+    V[uvp init] --> P[项目目录]
+    P --> |uvp adr| A[ADR 文件]
+    P --> |uvp obsidian| O[Obsidian Vault]
+    CS[Cherry Studio] --> |导出笔记| O
+    O --> |uvp adr --from-obsidian| A
+    A --> |AI 执行指令| CODE[代码改进]
+    CS --> |知识库对话| N[论文笔记]
+    N --> |导出| O

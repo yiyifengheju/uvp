@@ -1,0 +1,13 @@
+# Feature Registry
+# 此文件由 uvp 自动维护，记录所有特性的状态
+# AI 读取此文件判断任务属于哪个 Feature，通过 id + title 匹配
+
+features: []
+# 示例条目（AI 匹配时参考此格式）:
+# - id: FEAT-001
+#   title: "鸢尾花分类"
+#   status: planned          # planned | in_progress | implemented | verified | paused | deprecated
+#   directory: docs/features/FEAT-001-鸢尾花分类
+#   adr: "0001"              # 关联的 ADR 编号，无则为 "-"
+#   created: "2025-06-14"
+#   updated: "2025-06-14"

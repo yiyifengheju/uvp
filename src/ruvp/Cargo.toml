@@ -1,0 +1,28 @@
+[package]
+name = "uvp"
+version = "2026.6.0"
+edition = "2024"
+description = "uv plus extension tool - Vibe Coding 初始化工具"
+
+[[bin]]
+name = "uvp"
+path = "main.rs"
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+toml = "1.1"
+serde = { version = "1", features = ["derive"] }
+serde_yaml = "0.9"
+dirs = "6"
+chrono = "0.4"
+open = "5"
+regex = "1"
+console = "0.16"
+indicatif = "0.18"
+shellexpand = "3"
+
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3", features = ["winbase", "handleapi", "processenv"] }
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"

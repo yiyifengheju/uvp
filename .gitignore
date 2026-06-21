@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+*.whl
+
+# Virtual environments
+.venv/
+
+# Build / Distribution
+build/
+dist/
+
+# IDE
+.idea/
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# uv
+.python-version
+uv.lock
+
+# claude
+.claude/
+docs/ADR/
+docs/PRD/
+docs/wechat/
+

@@ -1,0 +1,233 @@
+# yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
+site_name: {project_name}
+site_url: https://{project_name}.mastermao.cn/
+theme:
+  # 主题名称
+  name: material
+  # 语言
+  language: zh
+  # 首页
+  #  homepage: mastermao.cn
+  # 网站图标 (位于./docs/assets)
+  favicon: assets/favicon.svg
+  # logo(网页标签显示的图标)
+  logo: assets/logo.svg
+  # 不使用google fonts(字体设置在css中)
+  font: false
+  # icon
+  icon:
+    #logo: fontawesome/brands/battle-net
+    #repo: fontawesome/brands/git
+    admonition:
+      note: octicons/tag-16
+      abstract: octicons/checklist-16
+      info: octicons/info-16
+      tip: octicons/squirrel-16
+      success: octicons/check-16
+      question: octicons/question-16
+      warning: octicons/alert-16
+      failure: octicons/x-circle-16
+      danger: octicons/zap-16
+      bug: octicons/bug-16
+      example: octicons/beaker-16
+      quote: octicons/quote-16
+  # 扩展材料(自己写的HTML, 保存在 ./overrides)
+  custom_dir: overrides
+
+  # 配色
+  palette:
+    # ==================暗色模式==================
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: 日间模式
+
+    # ==================亮色模式==================
+    - media: "(prefers-color-scheme: light)"
+      # 亮/暗
+      scheme: default
+      # 主题色
+      primary: white
+      # 高亮色
+      accent: indigo
+      # 切换按钮
+      toggle:
+        icon: material/brightness-7
+        name: 夜间模式
+
+  features:
+    # ==================页面设置==================
+    # 即时加载
+    - navigation.instant
+    # 锚点跟踪
+    - navigation.tracking
+    # 锚点跟踪滚动（文章TOC添加到侧边栏）
+    #- toc.integrate
+    # 返回顶部
+    - navigation.top
+    # 添加章节索引
+    # nav:
+    #  - Section:
+    #    - section/McDocs.md
+    #    - Page 1: section/page-1.md
+    #    ...
+    #    - Page n: section/page-n.md
+    # 章节索引(把index独立放在侧边栏一级标题下)
+    - navigation.indexes
+    # ==================导航栏设置==================
+    # 导航栏选项卡
+    - navigation.tabs
+    # 导航栏始终可见(往下滚动的时候始终可见选项卡)
+    #- navigation.tabs.sticky
+    # ==================侧边栏设置==================
+    # 侧边栏二级展示
+    - navigation.tracking
+    # 展示方式（多级标题or折叠）
+    #- navigation.sections
+    # 侧边栏不折叠
+    #- navigation.expand
+    # ==================标头设置==================
+    # 搜索高亮显示
+    - search.highlight
+    # 标头自动隐藏
+    - header.autohide
+    # 公告栏关闭按钮
+    - announce.dismiss
+    # ==================页脚设置==================
+    # 上一页下一页
+    #- navigation.footer
+    # ==================代码复制==================
+    - content.code.copy
+
+# Markdown扩展
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.tilde
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.snippets:
+      auto_append:
+        - lib/abbreviations.md
+  - pymdownx.highlight:
+      linenums: true
+      linenums_style: pymdownx-inline
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+      options:
+        custom_icons:
+          - overrides/.icons
+
+  # 需要安装(https://www.neoteroi.dev/mkdocs-plugins/) pip install neoteroi-mkdocs
+  - neoteroi.timeline
+
+# 插件
+plugins:
+  # 搜索
+  - search:
+      separator: '[\s\-,:!=\[\]()"/]+|(?!\b)(?=[A-Z][a-z])|\.(?!\d)|&[lg]t;'
+  - awesome-pages
+  # 需要安装 rye add mkdocs-glightbox
+  - glightbox:
+      zoomable: false
+      auto_caption: false
+      skip_classes:
+        - no-glb
+        - bandage
+#  - blog:
+#      post_date_format: full
+#      post_url_date_format: yyyy
+#      post_url_format: "{date}/{file}"
+#      post_excerpt_separator: <!-- more -->
+#      post_slugify: !!python/object/apply:pymdownx.slugs.slugify
+#        kwds:
+#          case: lower
+#      post_readtime: true
+#      post_readtime_words_per_minute: 265
+#      archive: true
+#      archive_name: Archive
+#      archive_date_format: yyyy
+#      archive_url_date_format: yyyy
+#      archive_url_format: "archive/{date}"
+#      archive_toc: false
+#      categories: true
+#      categories_name: Categories
+#      categories_url_format: "category/{slug}"
+#      categories_slugify: !!python/object/apply:pymdownx.slugs.slugify
+#        kwds:
+#          case: lower
+#      categories_toc: false
+#      pagination_per_page: 5
+# 需要安装 rye add mkdocs-jupyter
+#  - mkdocs-jupyter:
+#      ignore: [".ipynb_checkpoints/*.ipynb"]
+#      ignore: [".ipynb_checkpoints/*.ipynb", "*.py", "*.ipynb"]
+
+
+extra:
+  # 页脚社交连接
+#  social:
+#    # Home
+#    - icon: simple/googlehome
+#      link: https://note.mastermao.cn
+#    #  ONAV
+#    - icon: simple/digitalocean
+#      link: https://onav.mastermao.cn
+#    # blog
+#    - icon: fontawesome/solid/bath
+#      link: https://blog.mastermao.cn
+#    # Gallery
+#    - icon: fontawesome/solid/camera-retro
+#      link: https://gallery.mastermao.cn
+#    # Note
+#    - icon: fontawesome/solid/microscope
+#      link: https://note.mastermao.cn
+#    - icon: fontawesome/brands/git
+#      link: https://gitee.com/mastermao
+#    - icon: fontawesome/solid/dna
+#      link: https://onav.mastermao.cn
+  # 页脚是否显示 made with Material...
+  generator: true
+
+# 页脚显示版权信息
+copyright: Copyright &copy; 2023 - 2024 一一风和橘
+
+# 导航栏右侧显示GitHub
+#repo_url: https://github.com/squidfunk/mkdocs-material
+#repo_name: squidfunk/mkdocs-material
+
+# 自定义CSS
+extra_css:
+  - stylesheets/extra.css
+
+# 自定义js
+extra_javascript:
+  - javascripts/extra.js
+  - javascripts/mathjax.min.js
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+  - javascripts/after.min.js
+#  - https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js
+#  - javascripts/fireworks.min.js
