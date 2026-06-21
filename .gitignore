@@ -24,6 +24,9 @@ Desktop.ini
 .python-version
 uv.lock
 
+# Rust
+target/
+
 # claude
 .claude/
 docs/ADR/
