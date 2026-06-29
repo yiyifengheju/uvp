@@ -1,93 +1,83 @@
 #!/bin/bash
-# 跨平台构建脚本 - 为 Windows、macOS、Linux 编译 uvp
-
+# 构建脚本 - Windows x86_64 + macOS Apple Silicon (M3)
 set -e
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$PROJECT_ROOT"
 
 VERSION="2026.6.0"
 BUILD_DIR="build/rs-v${VERSION}"
+CARGO_DIR="src/ruvp"
 
-echo "🔨 Building uvp v${VERSION}"
+MAC_TARGET="aarch64-apple-darwin"
+
+echo "[BUILD] uvp v${VERSION}"
 echo ""
 
-# 创建构建目录
-mkdir -p ${BUILD_DIR}
+mkdir -p "${BUILD_DIR}"
 
-# 定义目标平台
-declare -A TARGETS=(
-    ["x86_64-pc-windows-msvc"]="uvp.exe"
-    ["x86_64-apple-darwin"]="uvp-macos-x64"
-    ["aarch64-apple-darwin"]="uvp-macos-arm64"
-    ["x86_64-unknown-linux-gnu"]="uvp-linux-x64"
-    ["aarch64-unknown-linux-gnu"]="uvp-linux-arm64"
-)
-
-# 检查是否安装了目标平台的支持
 check_target() {
     local target=$1
-    if ! rustup target list | grep -q "${target} (installed)"; then
-        echo "⚠️  Target ${target} not installed. Installing..."
-        rustup target add ${target}
+    if ! rustup target list --installed | grep -q "^${target}$"; then
+        echo "[INFO] Installing target ${target}..."
+        rustup target add "${target}"
     fi
 }
 
-# 编译指定平台
-build_target() {
-    local target=$1
-    local output_name=$2
-    
-    echo "📦 Building for ${target}..."
-    check_target ${target}
-    
-    cargo build --release --target ${target}
-    
-    # 复制二进制文件
-    local src="target/${target}/release/${output_name}"
-    local dst="${BUILD_DIR}/uvp-${target}"
-    
-    if [ -f "${src}" ]; then
-        cp "${src}" "${dst}"
-        echo "✓ Built: ${dst}"
+build_native() {
+    echo "[BUILD] Compiling for current platform (native)..."
+    cargo build --release --manifest-path "${CARGO_DIR}/Cargo.toml"
+
+    if [ -f "${CARGO_DIR}/target/release/uvp.exe" ]; then
+        cp "${CARGO_DIR}/target/release/uvp.exe" "${BUILD_DIR}/uvp-windows-x86_64.exe"
+        echo "[OK] Built: ${BUILD_DIR}/uvp-windows-x86_64.exe"
+    elif [ -f "${CARGO_DIR}/target/release/uvp" ]; then
+        cp "${CARGO_DIR}/target/release/uvp" "${BUILD_DIR}/uvp-$(uname -m)"
+        echo "[OK] Built: ${BUILD_DIR}/uvp-$(uname -m)"
     else
-        echo "✗ Failed to build ${target}"
+        echo "[FAIL] Native binary not found"
         return 1
     fi
 }
 
-# 构建当前平台
-build_current() {
-    echo "📦 Building for current platform..."
-    cargo build --release
-    
-    local output="target/release/uvp"
-    if [ -f "${output}.exe" ]; then
-        cp "${output}.exe" "${BUILD_DIR}/uvp.exe"
-        echo "✓ Built: ${BUILD_DIR}/uvp.exe"
+build_macos() {
+    echo "[BUILD] Compiling for macOS Apple Silicon (${MAC_TARGET})..."
+    check_target "${MAC_TARGET}"
+
+    cargo build --release --manifest-path "${CARGO_DIR}/Cargo.toml" --target "${MAC_TARGET}"
+
+    local src="${CARGO_DIR}/target/${MAC_TARGET}/release/uvp"
+    if [ -f "${src}" ]; then
+        cp "${src}" "${BUILD_DIR}/uvp-macos-aarch64"
+        echo "[OK] Built: ${BUILD_DIR}/uvp-macos-aarch64"
     else
-        cp "${output}" "${BUILD_DIR}/uvp"
-        echo "✓ Built: ${BUILD_DIR}/uvp"
+        echo "[FAIL] macOS binary not found: ${src}"
+        return 1
     fi
 }
 
-# 主逻辑
 case "${1}" in
-    "all")
-        echo "🌍 Building for all platforms..."
-        for target in "${!TARGETS[@]}"; do
-            build_target "${target}" "${TARGETS[$target]}" || true
-        done
+    "windows")
+        build_native
         ;;
-    "current")
-        build_current
+    "macos")
+        build_macos
+        ;;
+    "all"|"")
+        build_native || echo "[WARN] Native build failed"
+        echo ""
+        build_macos || echo "[WARN] macOS build failed (expected on non-macOS without cross toolchain)"
         ;;
     *)
-        echo "Usage: $0 {all|current}"
+        echo "Usage: $0 [windows|macos|all]"
         echo ""
-        echo "  all     - Build for all supported platforms"
-        echo "  current - Build for current platform only"
+        echo "  windows - Build for current platform (native)"
+        echo "  macos   - Build for macOS Apple Silicon (M3)"
+        echo "  all     - Build both (default)"
         exit 1
         ;;
 esac
 
 echo ""
-echo "✅ Build completed!"
-echo "📁 Binaries are in ${BUILD_DIR}/"
+echo "[DONE] Build completed! Binaries are in ${BUILD_DIR}/"

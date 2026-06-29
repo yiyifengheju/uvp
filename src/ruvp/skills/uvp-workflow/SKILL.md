@@ -96,9 +96,9 @@ uvp f close FEAT-XXX     # 全部通过后才执行
 
 ## Step 6: DISTILL — 知识提炼
 
-1. 更新 `context.md`（关键决策、经验教训、架构影响）
-2. 更新 `docs/PROJECT_STATE.md`（系统最新状态）
-3. 仅当项目事实变化时更新 `docs/AI_CONTEXT.md`
+1. 强制更新 `context.md`（关键决策、经验教训、架构影响）
+2. 强制更新 `docs/PROJECT_STATE.md`（系统最新状态）
+3. 强制更新 `docs/AI_CONTEXT.md`（全局上下文）
 
 模板详见 `uvp-feature-lifecycle` skill。
 

@@ -15,23 +15,23 @@ project: "{project_name}"
 
 ### 1. 工作流：6 步闭环
 每次编程任务必须遵循 **Decide → Define → Plan → Implement → Verify → Distill** 流程。
-详见 skill：`~/.uvp/skills/uvp-workflow/SKILL.md`
+详见 skill：`.claude/skills/uvp-workflow/SKILL.md`
 
 ### 2. 文件联动：改代码必须同步文档
 修改 `src/` 后**立即**更新 `changelog.md`；接口变更同步 `spec.md`；产出记录到 `deliverables.md`。
-详见 skill：`~/.uvp/skills/uvp-file-coupling/SKILL.md`
+详见 skill：`.claude/skills/uvp-file-coupling/SKILL.md`
 
 ### 3. Feature 生命周期
 Feature 有 6 种状态（idea→planned→implementing→verifying→verified→closed），每个状态有对应的文档要求。
-详见 skill：`~/.uvp/skills/uvp-feature-lifecycle/SKILL.md`
+详见 skill：`.claude/skills/uvp-feature-lifecycle/SKILL.md`
 
 ### 4. 文档 Meta 头
 `docs/` 下所有 markdown 必须包含 YAML front matter（至少 `title` + `date`）。
-详见 skill：`~/.uvp/skills/uvp-meta-header/SKILL.md`
+详见 skill：`.claude/skills/uvp-meta-header/SKILL.md`
 
 ### 5. 周报生成
 周报统一放在 `docs/周报/`，文件名 `YYYYMMWNN.md`，按大纲模板生成。
-详见 skill：`~/.uvp/skills/uvp-weekly-report/SKILL.md`
+详见 skill：`.claude/skills/uvp-weekly-report/SKILL.md`
 
 ---
 
