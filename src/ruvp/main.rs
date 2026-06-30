@@ -6,7 +6,7 @@ mod commands;
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
-#[command(name = "uvp", version = "2026.6.0", about = "UVP - Vibe Coding 初始化工具")]
+#[command(name = "uvp", version = env!("CARGO_PKG_VERSION"), about = "UVP - Vibe Coding 初始化工具")]
 struct Cli {
     /// 静默模式
     #[arg(short, long)]
@@ -125,6 +125,12 @@ enum Commands {
         #[arg(long)]
         all: bool,
     },
+    /// 管理 uvp 自身（更新等）
+    #[command(name = "self")]
+    SelfCmd {
+        #[command(subcommand)]
+        command: SelfCommands,
+    },
 }
 
 #[derive(Subcommand)]
@@ -202,6 +208,12 @@ enum TodoCommands {
     },
 }
 
+#[derive(Subcommand)]
+enum SelfCommands {
+    /// 检查并更新到最新版本
+    Update,
+}
+
 fn main() {
     let cli = Cli::parse();
 
@@ -235,6 +247,11 @@ fn main() {
         }
         Commands::Todo { command, all } => {
             commands::todo_cmd::run(command, all);
+        }
+        Commands::SelfCmd { command } => {
+            match command {
+                SelfCommands::Update => commands::self_cmd::update(),
+            }
         }
     }
 }

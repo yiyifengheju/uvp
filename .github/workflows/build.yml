@@ -82,6 +82,8 @@ jobs:
           cp artifacts/uvp-windows-x86_64.exe/uvp-windows-x86_64.exe release/
           cp artifacts/uvp-macos-aarch64/uvp-macos-aarch64 release/
           chmod +x release/uvp-macos-aarch64
+          cp scripts/install.sh release/
+          cp scripts/install.ps1 release/
 
       - name: Create or update release
         uses: softprops/action-gh-release@v2

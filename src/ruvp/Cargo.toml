@@ -20,6 +20,7 @@ regex = "1"
 console = "0.16"
 indicatif = "0.18"
 shellexpand = "3"
+self_update = { version = "0.44", features = ["archive-tar", "archive-zip", "compression-flate2", "compression-zip-deflate"] }
 
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3", features = ["winbase", "handleapi", "processenv"] }
