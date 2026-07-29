@@ -44,6 +44,17 @@ jobs:
           key: ${{ matrix.target }}-cargo-${{ hashFiles('src/ruvp/Cargo.lock', 'src/ruvp/Cargo.toml') }}
           restore-keys: ${{ matrix.target }}-cargo-
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build frontend
+        working-directory: ${{ env.CARGO_DIR }}/web
+        run: |
+          npm ci
+          npm run build
+
       - name: Build
         run: cargo build --release --manifest-path ${{ env.CARGO_DIR }}/Cargo.toml --target ${{ matrix.target }}
 
