@@ -46,44 +46,64 @@
     return { done, total, complete: done === total };
   }
 
-  function getHighlightedIds(nodeKey) {
-    if (!nodeKey || !overview) return new Set();
-    const highlighted = new Set([nodeKey]);
+  function getHighlightTiers(nodeKey) {
+    if (!nodeKey || !overview) return { direct: new Set(), indirect: new Set() };
     const edges = overview.edges || [];
-    let changed = true;
-    while (changed) {
-      changed = false;
+
+    // BFS: compute distance from the active node
+    const dist = new Map();
+    dist.set(nodeKey, 0);
+    const queue = [nodeKey];
+
+    while (queue.length > 0) {
+      const current = queue.shift();
+      const d = dist.get(current);
       for (const edge of edges) {
         const fromKey = `${edge.from_type}:${edge.from_id}`;
         const toKey = `${edge.to_type}:${edge.to_id}`;
-        if (highlighted.has(fromKey) && !highlighted.has(toKey)) {
-          highlighted.add(toKey);
-          changed = true;
-        }
-        if (highlighted.has(toKey) && !highlighted.has(fromKey)) {
-          highlighted.add(fromKey);
-          changed = true;
+        let neighbor = null;
+        if (fromKey === current) neighbor = toKey;
+        else if (toKey === current) neighbor = fromKey;
+        if (neighbor && !dist.has(neighbor)) {
+          dist.set(neighbor, d + 1);
+          queue.push(neighbor);
         }
       }
     }
-    return highlighted;
+
+    const direct = new Set();
+    const indirect = new Set();
+    for (const [key, d] of dist) {
+      if (d === 0) { direct.add(key); }
+      else if (d === 1) { direct.add(key); }
+      else { indirect.add(key); }
+    }
+    return { direct, indirect };
   }
 
-  let highlightedIds = $derived(getHighlightedIds(activeNode));
+  let highlightTiers = $derived(getHighlightTiers(activeNode));
+  let highlightedIds = $derived(new Set([...highlightTiers.direct, ...highlightTiers.indirect]));
 
   function isDimmed(type, id) {
     if (!activeNode) return false;
-    return !highlightedIds.has(`${type}:${id}`);
+    const key = `${type}:${id}`;
+    return !highlightTiers.direct.has(key) && !highlightTiers.indirect.has(key);
   }
 
   function isHighlighted(type, id) {
     if (!activeNode) return false;
-    return highlightedIds.has(`${type}:${id}`);
+    return highlightTiers.direct.has(`${type}:${id}`);
+  }
+
+  function isSecondary(type, id) {
+    if (!activeNode) return false;
+    return highlightTiers.indirect.has(`${type}:${id}`);
   }
 
   function nodeClass(type, id) {
     if (isDimmed(type, id)) return 'opacity-20 scale-[0.98] transition-all duration-200';
     if (isHighlighted(type, id)) return 'ring-1 ring-[var(--color-primary)] shadow-[0_0_12px_rgba(99,102,241,0.15)] transition-all duration-200';
+    if (isSecondary(type, id)) return 'ring-1 ring-[var(--color-primary)]/40 opacity-70 transition-all duration-200';
     return 'transition-all duration-200';
   }
 
@@ -234,7 +254,7 @@
 
   <!-- Board content -->
   <div class="relative p-5" bind:this={gridEl} onclick={handleBoardClick}>
-    <EdgeCanvas edges={overview.edges || []} {nodePositions} hoveredNode={activeNode} {highlightedIds} />
+    <EdgeCanvas edges={overview.edges || []} {nodePositions} hoveredNode={activeNode} {highlightedIds} {highlightTiers} />
 
     <div class="grid grid-cols-4 gap-10 relative z-10">
       <!-- Roadmap column (P4: progress indicators, color-coded by timeframe, completed folded) -->

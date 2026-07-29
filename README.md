@@ -1,8 +1,8 @@
-# uvp — Vibe Coding 脚手架
+# uvp — Vibe Coding 工作流工具
 
 > **Vibe Coding Is All You Need**
 
-uvp 是一个与 AI 工作流耦合的项目管理脚手架。它把**特性**作为最小闭环单位，通过结构化文档、状态流转和文件联动规则，让 AI 能准确区分"当前事实"与"历史噪音"。
+uvp 是一个与 AI 工作流耦合的项目管理工具。它把**特性**作为最小闭环单位，通过结构化文档、状态流转和文件联动规则，让 AI 能准确区分"当前事实"与"历史噪音"。
 
 Rust 编译，单文件分发，不依赖运行时，支持 Windows / macOS / Linux。
 
@@ -143,7 +143,19 @@ uvp adr "技术决策"（--from-obsidian 引用笔记）
 uvp + AI 6 步闭环协作
     ↓
 uvp render → mkdocs build → 静态文档站
+    ↓
+uvp kanban → 全局看板（跨项目 TODO/Feature/ADR/Roadmap 聚合）
 ```
+
+### 数据链路
+
+```
+TODO → ADR → Feature → Roadmap
+```
+
+- TODO 通过 `[ADR-NNN]` 标记关联决策
+- ADR 通过 `related_features` 关联特性
+- Feature 闭环后由 AI 语义匹配写入 Roadmap
 
 ## CLI 命令
 
@@ -159,19 +171,24 @@ uvp render → mkdocs build → 静态文档站
 | `uvp render` | Mkdocs 页面渲染 |
 | `uvp ide` | IDE 规则生成 + Skill 部署 |
 | `uvp todo` | 想法/待办管理 |
+| `uvp kanban` | 全局看板（本地 Web 服务器） |
+| `uvp self update` | 检查并更新到最新版本 |
 
 ## AI Skills
 
-uvp 内置 4 个 AI Skill，通过 `uvp ide` 部署到项目中，AI 每次对话自动加载：
+uvp 内置 5 个 AI Skill，通过 `uvp ide` 部署到项目中，AI 每次对话自动加载：
 
 | Skill | 功能 |
 |-------|------|
 | uvp-workflow | 6 步闭环工作流约束 |
 | uvp-feature-lifecycle | Feature 模板和状态流转规范 |
 | uvp-file-coupling | 文件修改联动规则 |
+| uvp-meta-header | 文档 Meta Header 规范 |
 | uvp-weekly-report | 周报自动生成 |
 
 ## 技术栈
 
 - **语言**：Rust（Edition 2024），单文件二进制，模板通过 `include_str!` 编译时内嵌
+- **Web 看板**：axum + tokio + rust-embed（后端）/ Svelte 5 + Vite + TailwindCSS 4（前端）
+- **文档站**：MkDocs Material
 - **平台**：Windows / macOS / Linux
