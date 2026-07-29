@@ -58,7 +58,7 @@ pub struct AdrConfig {
     pub naming: String,
 }
 
-fn default_adr_directory() -> String { "docs/adr".into() }
+fn default_adr_directory() -> String { "docs/ADR".into() }
 fn default_adr_naming() -> String { "sequential".into() }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
@@ -89,18 +89,26 @@ fn default_obsidian_exclude_dirs() -> Vec<String> {
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct InitConfig {
-    #[serde(default = "default_true")]
-    pub auto_uv_init: bool,
-    #[serde(default = "default_true")]
-    pub auto_mkdocs: bool,
-    #[serde(default = "default_true")]
-    pub auto_ai_context: bool,
-    #[serde(default = "default_true")]
-    pub auto_ai_rules: bool,
-    #[serde(default = "default_true")]
-    pub auto_feature_ledger: bool,
+    #[serde(default)]
+    pub auto_uv_init: Option<bool>,
+    #[serde(default)]
+    pub auto_mkdocs: Option<bool>,
+    #[serde(default)]
+    pub auto_ai_context: Option<bool>,
+    #[serde(default)]
+    pub auto_ai_rules: Option<bool>,
+    #[serde(default)]
+    pub auto_feature_ledger: Option<bool>,
     #[serde(default = "default_init_dependencies")]
     pub dependencies: Vec<String>,
+}
+
+impl InitConfig {
+    pub fn is_auto_uv_init(&self) -> bool { self.auto_uv_init.unwrap_or(true) }
+    pub fn is_auto_mkdocs(&self) -> bool { self.auto_mkdocs.unwrap_or(true) }
+    pub fn is_auto_ai_context(&self) -> bool { self.auto_ai_context.unwrap_or(true) }
+    pub fn is_auto_ai_rules(&self) -> bool { self.auto_ai_rules.unwrap_or(true) }
+    pub fn is_auto_feature_ledger(&self) -> bool { self.auto_feature_ledger.unwrap_or(true) }
 }
 
 fn default_init_dependencies() -> Vec<String> {
@@ -120,7 +128,11 @@ pub struct UiConfig {
 
 fn default_ui_delay_ms() -> u64 { 120 }
 
-fn default_true() -> bool { true }
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct ProjectEntry {
+    pub path: String,
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct UvpConfig {
@@ -134,6 +146,8 @@ pub struct UvpConfig {
     pub init: InitConfig,
     #[serde(default)]
     pub ui: UiConfig,
+    #[serde(default)]
+    pub projects: Vec<ProjectEntry>,
 }
 
 // ── 全局配置路径 ──────────────────────────────────────
@@ -184,15 +198,18 @@ pub fn merge_configs(base: &UvpConfig, other: &UvpConfig) -> UvpConfig {
     if !other.obsidian.exclude_dirs.is_empty() { result.obsidian.exclude_dirs = other.obsidian.exclude_dirs.clone(); }
 
     // Init
-    if other.init.auto_uv_init { result.init.auto_uv_init = true; }
-    if other.init.auto_mkdocs { result.init.auto_mkdocs = true; }
-    if other.init.auto_ai_context { result.init.auto_ai_context = true; }
-    if other.init.auto_ai_rules { result.init.auto_ai_rules = true; }
-    if other.init.auto_feature_ledger { result.init.auto_feature_ledger = true; }
+    if other.init.auto_uv_init.is_some() { result.init.auto_uv_init = other.init.auto_uv_init; }
+    if other.init.auto_mkdocs.is_some() { result.init.auto_mkdocs = other.init.auto_mkdocs; }
+    if other.init.auto_ai_context.is_some() { result.init.auto_ai_context = other.init.auto_ai_context; }
+    if other.init.auto_ai_rules.is_some() { result.init.auto_ai_rules = other.init.auto_ai_rules; }
+    if other.init.auto_feature_ledger.is_some() { result.init.auto_feature_ledger = other.init.auto_feature_ledger; }
     if !other.init.dependencies.is_empty() { result.init.dependencies = other.init.dependencies.clone(); }
 
     // UI
     if other.ui.delay_ms != 0 { result.ui.delay_ms = other.ui.delay_ms; }
+
+    // Projects
+    if !other.projects.is_empty() { result.projects = other.projects.clone(); }
 
     result
 }
@@ -306,7 +323,7 @@ pub fn init_global_config() {
 # 所有配置项的默认值，项目级 uvp.toml 可覆盖部分项
 
 [adr]
-directory = "docs/adr"
+directory = "docs/ADR"
 naming = "sequential"
 
 [feature]
@@ -327,6 +344,9 @@ dependencies = ["mkdocs-material", "mkdocs-glightbox", "mkdocs-awesome-pages-plu
 
 [ui]
 delay_ms = 120
+
+# [[projects]]
+# path = "/path/to/your/project"
 "#;
     let _ = fs::write(&config_path, default_config);
 }

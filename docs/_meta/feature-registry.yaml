@@ -1,147 +1,138 @@
 # Feature Registry
 # 此文件由 uvp 自动维护，记录所有特性的状态
+# AI 读取此文件判断任务属于哪个 Feature，通过 id + title 匹配
 
 features:
 - id: FEAT-001
   title: Feature Ledger 系统
   status: implemented
   directory: docs/features/FEAT-001-feature-ledger
-  adr: '0001'
-  created: '2026-06-14'
-  updated: '2026-06-19'
-
+  adr: '-'
+  created: 2026-06-14
+  updated: 2026-06-19
 - id: FEAT-002
   title: 项目初始化 (uvp init)
   status: implemented
   directory: docs/features/FEAT-002-project-init
-  adr: '0001'
-  created: '2026-06-16'
-  updated: '2026-06-19'
-
+  adr: '-'
+  created: 2026-06-16
+  updated: 2026-06-19
 - id: FEAT-003
   title: ADR 管理 (uvp adr)
   status: implemented
   directory: docs/features/FEAT-003-adr-management
-  adr: '0001'
-  created: '2026-06-16'
-  updated: '2026-06-19'
-
+  adr: '-'
+  created: 2026-06-16
+  updated: 2026-06-19
 - id: FEAT-004
   title: 特性生命周期管理 (uvp feature)
   status: implemented
   directory: docs/features/FEAT-004-feature-lifecycle
-  adr: '0001'
-  created: '2026-06-16'
-  updated: '2026-06-19'
-
+  adr: '-'
+  created: 2026-06-16
+  updated: 2026-06-19
 - id: FEAT-005
   title: Obsidian 同步 (uvp obsidian)
   status: implemented
   directory: docs/features/FEAT-005-obsidian-sync
-  adr: '0001'
-  created: '2026-06-16'
-  updated: '2026-06-19'
-
+  adr: '-'
+  created: 2026-06-16
+  updated: 2026-06-19
 - id: FEAT-006
   title: 状态展示 (uvp status)
   status: implemented
   directory: docs/features/FEAT-006-status-display
-  adr: '0001'
-  created: '2026-06-16'
-  updated: '2026-06-19'
-
+  adr: '-'
+  created: 2026-06-16
+  updated: 2026-06-19
 - id: FEAT-007
   title: 配置管理 (uvp config)
   status: implemented
   directory: docs/features/FEAT-007-config-management
-  adr: '0001'
-  created: '2026-06-16'
-  updated: '2026-06-19'
-
+  adr: '-'
+  created: 2026-06-16
+  updated: 2026-06-19
 - id: FEAT-008
   title: 文件头 Meta 管理
   status: implemented
   directory: docs/features/FEAT-008-meta-header
-  adr: '0001'
-  created: '2026-06-19'
-  updated: '2026-06-19'
-
+  adr: '-'
+  created: 2026-06-19
+  updated: 2026-06-19
 - id: FEAT-009
   title: 文档一致性检查 (uvp check)
   status: implemented
   directory: docs/features/FEAT-009-consistency-check
-  adr: '0001'
-  created: '2026-06-16'
-  updated: '2026-06-19'
-
+  adr: '-'
+  created: 2026-06-16
+  updated: 2026-06-19
 - id: FEAT-010
   title: 项目打包与分发
   status: implemented
   directory: docs/features/FEAT-010-build-distribution
-  adr: '0001'
-  created: '2026-06-16'
-  updated: '2026-06-19'
-
+  adr: '-'
+  created: 2026-06-16
+  updated: 2026-06-19
 - id: FEAT-011
   title: Mkdocs 页面渲染 (uvp render)
   status: implemented
   directory: docs/features/FEAT-011-mkdocs-render
-  adr: '0001'
-  created: '2026-06-19'
-  updated: '2026-06-19'
-
+  adr: '-'
+  created: 2026-06-19
+  updated: 2026-06-19
 - id: FEAT-012
   title: 终端显示设计 (uvp UI)
   status: implemented
   directory: docs/features/FEAT-012-terminal-ui-design
-  adr: '0001'
-  created: '2026-06-16'
-  updated: '2026-06-19'
-
+  adr: '-'
+  created: 2026-06-16
+  updated: 2026-06-19
 - id: FEAT-013
   title: IDE 规则生成与 Skill 部署 (uvp ide)
   status: implemented
   directory: docs/features/FEAT-013-ide-rules-deploy
-  adr: '0001'
-  created: '2026-06-19'
-  updated: '2026-06-19'
-
+  adr: '-'
+  created: 2026-06-19
+  updated: 2026-06-19
 - id: FEAT-014
   title: TODO 管理 (uvp todo)
   status: implemented
   directory: docs/features/FEAT-014-todo-management
   adr: '-'
-  created: '2026-06-19'
-  updated: '2026-06-19'
-
+  created: 2026-06-19
+  updated: 2026-06-19
 - id: FEAT-015
   title: 6步闭环工作流 (uvp-workflow skill)
   status: implemented
   directory: docs/features/FEAT-015-workflow-skill
-  adr: '0001'
-  created: '2026-06-19'
-  updated: '2026-06-19'
-
+  adr: '-'
+  created: 2026-06-19
+  updated: 2026-06-19
 - id: FEAT-016
   title: Feature 生命周期模板 (uvp-feature-lifecycle skill)
   status: implemented
   directory: docs/features/FEAT-016-feature-lifecycle-skill
-  adr: '0001'
-  created: '2026-06-19'
-  updated: '2026-06-19'
-
+  adr: '-'
+  created: 2026-06-19
+  updated: 2026-06-19
 - id: FEAT-017
   title: 文件修改联动规则 (uvp-file-coupling skill)
   status: implemented
   directory: docs/features/FEAT-017-file-coupling-skill
-  adr: '0001'
-  created: '2026-06-19'
-  updated: '2026-06-19'
-
+  adr: '-'
+  created: 2026-06-19
+  updated: 2026-06-19
 - id: FEAT-018
   title: 周报生成 (uvp-weekly-report skill)
   status: implemented
   directory: docs/features/FEAT-018-weekly-report-skill
-  adr: '0001'
-  created: '2026-06-19'
-  updated: '2026-06-19'
+  adr: '-'
+  created: 2026-06-19
+  updated: 2026-06-19
+- id: FEAT-019
+  title: 全局看板 (uvp kanban)
+  status: implementing
+  directory: docs/features/FEAT-019-全局看板-uvp-kanban
+  adr: '0007'
+  created: 2026-07-27
+  updated: 2026-07-27

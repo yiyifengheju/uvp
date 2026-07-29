@@ -16,17 +16,18 @@ use crate::config::UvpConfig;
 // ── Feature 状态枚举 ──────────────────────────────────
 
 pub const ALL_STATUSES: &[&str] = &[
-    "idea", "planned", "in_progress", "implemented",
-    "verified", "paused", "deprecated", "removed",
+    "idea", "planned", "implementing", "verifying",
+    "verified", "closed", "paused", "deprecated", "removed",
 ];
 
 pub fn status_emoji(status: &str) -> &'static str {
     match status {
         "idea" => "💡",
         "planned" => "📋",
-        "in_progress" => "🔧",
-        "implemented" => "✨",
+        "implementing" => "🔧",
+        "verifying" => "🔍",
         "verified" => "✅",
+        "closed" => "📦",
         "paused" => "⏸️",
         "deprecated" => "❌",
         "removed" => "🗑️",
@@ -199,6 +200,187 @@ macro_rules! embed_templates {
             }
         }
     };
+}
+
+// ── TODO 数据结构与解析 ──────────────────────────────
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TodoItem {
+    pub id: u32,
+    pub content: String,
+    pub created: String,
+    pub completed: Option<String>,
+    pub done: bool,
+}
+
+pub struct ParsedTodo {
+    pub items: Vec<TodoItem>,
+    pub extra_lines: Vec<String>,
+}
+
+pub fn parse_todos(content: &str) -> ParsedTodo {
+    let re = Regex::new(r"^- \[([ x])\] #(\d+) (.+?) <!-- (.+?) -->").unwrap();
+    let mut items = Vec::new();
+    let mut extra_lines = Vec::new();
+    let skip_re = Regex::new(r"^(#|>|$|\| |═)").unwrap();
+    let section_re = Regex::new(r"^## (待办|已完成)").unwrap();
+    for line in content.lines() {
+        if let Some(caps) = re.captures(line) {
+            let done = &caps[1] == "x";
+            let id: u32 = caps[2].parse().unwrap_or(0);
+            let text = caps[3].to_string();
+            let date_str = caps[4].to_string();
+            let (created, completed) = if done {
+                let parts: Vec<&str> = date_str.splitn(2, " → ").collect();
+                if parts.len() == 2 {
+                    (parts[0].trim().to_string(), Some(parts[1].trim().to_string()))
+                } else {
+                    (date_str.clone(), Some(date_str))
+                }
+            } else {
+                (date_str, None)
+            };
+            items.push(TodoItem { id, content: text, created, completed, done });
+        } else if !skip_re.is_match(line.trim()) && !section_re.is_match(line.trim()) && !line.trim().is_empty() {
+            extra_lines.push(line.to_string());
+        }
+    }
+    ParsedTodo { items, extra_lines }
+}
+
+pub fn rebuild_todo_file(items: &[TodoItem], extra_lines: &[String]) -> String {
+    let mut lines = Vec::new();
+    lines.push("# TODO".to_string());
+    lines.push(String::new());
+    lines.push("> 项目想法、待验证方向、灵感收集。成熟后转为 ADR 或 Feature。".to_string());
+    lines.push(String::new());
+    lines.push("## 待办".to_string());
+    lines.push(String::new());
+
+    for item in items.iter().filter(|i| !i.done) {
+        lines.push(format!("- [ ] #{} {} <!-- {} -->", item.id, item.content, item.created));
+    }
+
+    if !extra_lines.is_empty() {
+        lines.push(String::new());
+        for line in extra_lines {
+            lines.push(line.clone());
+        }
+    }
+
+    lines.push(String::new());
+    lines.push("## 已完成".to_string());
+    lines.push(String::new());
+
+    for item in items.iter().filter(|i| i.done) {
+        let date = match &item.completed {
+            Some(c) => format!("{} → {}", item.created, c),
+            None => item.created.clone(),
+        };
+        lines.push(format!("- [x] #{} {} <!-- {} -->", item.id, item.content, date));
+    }
+
+    lines.push(String::new());
+    lines.join("\n")
+}
+
+/// 从 TODO 内容中提取关联的 ADR 编号
+pub fn extract_todo_adr_refs(content: &str) -> Vec<String> {
+    let re = Regex::new(r"(?i)\[ADR-(\d+)\]").unwrap();
+    re.captures_iter(content).map(|c| {
+        let num: u32 = c[1].parse().unwrap_or(0);
+        format!("ADR-{:03}", num)
+    }).collect()
+}
+
+// ── ADR 数据结构 ──────────────────────────────────────
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AdrEntry {
+    pub id: String,
+    pub title: String,
+    pub status: String,
+    pub related_features: Vec<String>,
+}
+
+/// 解析 ADR 文件的 front matter，提取 id/title/status/related_features
+pub fn parse_adr_file(content: &str) -> Option<AdrEntry> {
+    if !content.starts_with("---") {
+        return None;
+    }
+    let end = content[3..].find("---")?;
+    let fm = &content[3..3 + end];
+
+    let mut title = String::new();
+    let mut adr_id = String::new();
+    let mut status = "proposed".to_string();
+    let mut related_features: Vec<String> = Vec::new();
+
+    for line in fm.lines() {
+        let trimmed = line.trim();
+        if trimmed.starts_with("title:") {
+            title = trimmed.splitn(2, ':').nth(1).unwrap_or("").trim().trim_matches('"').to_string();
+        } else if trimmed.starts_with("adr_id:") {
+            adr_id = trimmed.splitn(2, ':').nth(1).unwrap_or("").trim().trim_matches('"').to_string();
+        } else if trimmed.starts_with("status:") {
+            status = trimmed.splitn(2, ':').nth(1).unwrap_or("proposed").trim().to_string();
+        } else if trimmed.starts_with("related_features:") {
+            let val = trimmed.splitn(2, ':').nth(1).unwrap_or("").trim();
+            let re = Regex::new(r"FEAT-\d+").unwrap();
+            related_features = re.find_iter(val).map(|m| m.as_str().to_string()).collect();
+        }
+    }
+
+    if adr_id.is_empty() {
+        return None;
+    }
+
+    let num: u32 = adr_id.parse().unwrap_or(0);
+    let re_feat = Regex::new(r"FEAT-(\d+)").unwrap();
+    let normalized_features: Vec<String> = related_features.iter().map(|f| {
+        if let Some(caps) = re_feat.captures(f) {
+            let n: u32 = caps[1].parse().unwrap_or(0);
+            format!("FEAT-{:03}", n)
+        } else {
+            f.clone()
+        }
+    }).collect();
+
+    Some(AdrEntry { id: format!("ADR-{:03}", num), title, status, related_features: normalized_features })
+}
+
+// ── Roadmap 解析 ──────────────────────────────────────
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RoadmapItem {
+    pub section: String,
+    pub text: String,
+    pub linked_features: Vec<String>,
+}
+
+pub fn parse_roadmap(content: &str) -> Vec<RoadmapItem> {
+    let feat_re = Regex::new(r"(?:\$|\[)FEAT-(\d+)\]?").unwrap();
+    let section_re = Regex::new(r"^##\s+(.+)").unwrap();
+    let item_re = Regex::new(r"^-\s+(.+)").unwrap();
+    let mut items = Vec::new();
+    let mut current_section = String::new();
+
+    for line in content.lines() {
+        if let Some(caps) = section_re.captures(line) {
+            current_section = caps[1].to_string();
+        } else if let Some(caps) = item_re.captures(line) {
+            let text = caps[1].to_string();
+            let linked: Vec<String> = feat_re.captures_iter(&text)
+                .map(|c| format!("FEAT-{:03}", c[1].parse::<u32>().unwrap_or(0)))
+                .collect();
+            items.push(RoadmapItem {
+                section: current_section.clone(),
+                text: feat_re.replace_all(&text, "").trim().to_string(),
+                linked_features: linked,
+            });
+        }
+    }
+    items
 }
 
 embed_templates! {

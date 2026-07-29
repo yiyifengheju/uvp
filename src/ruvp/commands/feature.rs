@@ -42,7 +42,7 @@ fn feature_new(title: &str, adr_ref: Option<&str>) {
     let pb = ui::step_start(&format!("Creating {feat_id}: {title}"));
 
     // 创建 Feature 目录和文件
-    create_feature_files(&feat_dir, &feat_id, title, &project_dir);
+    create_feature_files(&feat_dir, &feat_id, title, &project_dir, adr_ref);
 
     // 更新 registry
     ui::step_update(&pb, "Updating feature registry");
@@ -65,7 +65,7 @@ fn feature_new(title: &str, adr_ref: Option<&str>) {
 
     ui::step_done(&pb, &format!("{feat_id} created: {title}"));
     println!("  目录: docs/features/{feat_dirname}");
-    println!("  状态: {}", console::style("planned").cyan());
+    println!("  状态: {}", ui::styled_cyan("planned"));
     if let Some(adr) = adr_ref {
         println!("  关联 ADR: {adr}");
     }
@@ -83,7 +83,7 @@ fn feature_list(filter_status: Option<&str>) {
     }
 
     if features.is_empty() {
-        println!("{}", console::style("-- 没有特性").dim());
+        ui::empty_msg("-- 没有特性");
         return;
     }
 
@@ -93,7 +93,12 @@ fn feature_list(filter_status: Option<&str>) {
 
     for feat in &features {
         let emoji = common::status_emoji(&feat.status);
-        let title_display = if feat.title.len() > 28 { format!("{}…", &feat.title[..26]) } else { feat.title.clone() };
+        let title_display = if feat.title.chars().count() > 28 {
+            let truncated: String = feat.title.chars().take(26).collect();
+            format!("{truncated}…")
+        } else {
+            feat.title.clone()
+        };
         println!("{:<10} {:<30} {} {:<12} {:<12} {:<12}",
             feat.id, title_display, emoji, feat.adr, feat.created, feat.updated);
     }
@@ -113,7 +118,7 @@ fn feature_show(feat_id: &str) {
     };
 
     let emoji = common::status_emoji(&feat.status);
-    println!("{}: {}", console::style(&feat.id).bold(), &feat.title);
+    println!("{}: {}", ui::styled_bold(&feat.id), &feat.title);
     println!("  状态: {emoji} {}", feat.status);
     println!("  关联 ADR: {}", feat.adr);
     println!("  创建日期: {}", feat.created);
@@ -124,7 +129,7 @@ fn feature_show(feat_id: &str) {
     let spec_path = project_dir.join(&feat.directory).join("spec.md");
     if spec_path.exists() {
         if let Ok(content) = fs::read_to_string(&spec_path) {
-            println!("\n{} spec.md 摘要:", console::style(">>").dim());
+            println!("\n{} spec.md 摘要:", ui::styled_dim(">>"));
             let preview: Vec<&str> = content.lines().take(20).collect();
             for line in preview {
                 println!("  {line}");
@@ -137,6 +142,12 @@ fn feature_show(feat_id: &str) {
 }
 
 fn feature_status(feat_id: &str, new_status: &str) {
+    if !common::ALL_STATUSES.contains(&new_status) {
+        println!("{} 非法状态 '{new_status}'", ui::icon_fail());
+        println!("  合法状态: {}", common::ALL_STATUSES.join(", "));
+        return;
+    }
+
     let project_dir = get_project_dir();
     let cfg = config::get_effective_config(&project_dir);
 
@@ -150,7 +161,7 @@ fn feature_status(feat_id: &str, new_status: &str) {
             feat.status = new_status_owned.clone();
             feat.updated = now;
             common::save_feature_registry(&project_dir, &cfg, &data);
-            println!("{} 状态已更新: {feat_id} → {}", ui::icon_ok(), console::style(&new_status_owned).cyan());
+            println!("{} 状态已更新: {feat_id} → {}", ui::icon_ok(), ui::styled_cyan(&new_status_owned));
 
             // 如果标记为 verified，更新 verification.md
             if new_status_owned == "verified" {
@@ -172,7 +183,8 @@ fn feature_status(feat_id: &str, new_status: &str) {
                     if let Ok(content) = fs::read_to_string(&context_path) {
                         let content = content
                             .replace("## 当前状态\n\nplanned", "## 当前状态\n\ndeprecated")
-                            .replace("## 当前状态\n\nin_progress", "## 当前状态\n\ndeprecated");
+                            .replace("## 当前状态\n\nimplementing", "## 当前状态\n\ndeprecated")
+                            .replace("## 当前状态\n\nverifying", "## 当前状态\n\ndeprecated");
                         let _ = fs::write(&context_path, content);
                     }
                 }
@@ -187,23 +199,22 @@ fn feature_status(feat_id: &str, new_status: &str) {
 }
 
 fn feature_close(feat_id: &str) {
-    feature_status(feat_id, "verified");
+    feature_status(feat_id, "closed");
 }
 
 fn feature_archive(feat_id: &str) {
     feature_status(feat_id, "deprecated");
 }
 
-fn create_feature_files(feat_dir: &std::path::Path, feat_id: &str, title: &str, project_dir: &std::path::Path) {
+fn create_feature_files(feat_dir: &std::path::Path, feat_id: &str, title: &str, project_dir: &std::path::Path, adr_ref: Option<&str>) {
     let _ = fs::create_dir_all(feat_dir);
     let today = Local::now().format("%Y-%m-%d").to_string();
 
     let files = [
-        ("spec.md", format_spec(feat_id, title, &today)),
+        ("spec.md", format_spec(feat_id, title, &today, adr_ref)),
         ("changelog.md", format_changelog(feat_id, title, &today)),
         ("verification.md", format_verification(feat_id, title, &today)),
         ("context.md", format_context(feat_id, title, &today)),
-        ("deliverables.md", format_deliverables(feat_id, title, &today)),
         ("plan.md", format_plan(feat_id, title, &today)),
     ];
 
@@ -221,7 +232,11 @@ fn create_feature_files(feat_dir: &std::path::Path, feat_id: &str, title: &str, 
     }
 }
 
-fn format_spec(feat_id: &str, title: &str, date: &str) -> String {
+fn format_spec(feat_id: &str, title: &str, date: &str, adr_ref: Option<&str>) -> String {
+    let related_adr = match adr_ref {
+        Some(adr) => format!("\"{adr}\""),
+        None => "null".to_string(),
+    };
     format!(r#"---
 doc_type: feature-spec
 title: "{feat_id}: {title}"
@@ -229,7 +244,7 @@ date: {date}
 feat_id: "{feat_id}"
 status: planned
 updated: {date}
-related_adr: null
+related_adr: {related_adr}
 ---
 
 # {feat_id}: {title}
@@ -237,6 +252,10 @@ related_adr: null
 ## 概述
 
 <!-- 一句话描述此特性的目标 -->
+
+## 决策记录
+
+<!-- 人工与 AI 的问答决策结论。记录"决定做什么、为什么这样选、否决了什么" -->
 
 ## 验收标准
 
@@ -252,7 +271,7 @@ related_adr: null
 
 ## 约束
 
-<!-- 描述性能、安全、兼容性等约束 -->
+<!-- 性能、安全、兼容性等约束 -->
 "#)
 }
 
@@ -282,6 +301,9 @@ title: "{feat_id} Verification"
 date: {date}
 feat_id: "{feat_id}"
 updated: {date}
+metrics: {{}}
+figures: []
+repro_cmd: ""
 ---
 
 # {feat_id} Verification
@@ -294,13 +316,31 @@ updated: {date}
 
 <!-- 从 spec.md 中提取的验收标准 -->
 
-## 测试用例
+## 验证证据（按适用勾选，算法类至少含 ★）
 
-<!-- 列出验证此特性的测试用例 -->
+- [ ] ★ 量化指标表（Se/PPV/准确率/混淆矩阵… 对标基准）
+- [ ] ★ 可复现命令（一行能重跑出下列结果）
+- [ ] 可视化（结果图，存 images/，嵌入本文件）— 算法/信号/分类类默认要
+- [ ] 失败样例/边界样例（不只报成功）
+- [ ] 与基准/既有方案对比
 
-## 验证结果
+## 量化结果
 
-<!-- 记录验证结果 -->
+<!-- 填写指标表，同步更新 front matter metrics 字段 -->
+
+## 可复现命令
+
+```bash
+# 同步更新 front matter repro_cmd 字段
+```
+
+## 可视化
+
+<!-- 图像放 images/ 目录，同步更新 front matter figures 字段 -->
+
+## 验证结论
+
+<!-- ✅ 通过 / ❌ 未通过 / 🔶 有条件通过 -->
 "#)
 }
 
@@ -315,56 +355,24 @@ updated: {date}
 
 # {feat_id} Context
 
-> 此文件为 AI 提供压缩上下文，由 Distill 步骤维护。
+> 交给 AI 的既定事实上下文。Distill 步骤维护，关闭时填写。
+> AI 读取此文件即可获得最短上手路径，无需翻阅历史对话。
 
 ## 当前状态
 
 planned
 
-## 目标摘要
+## 既定事实
 
-<!-- 一句话描述此特性要达成什么 -->
+<!-- 当前生效的约束、选型结论、架构要点——只记"是什么"，不记"为什么"（为什么在 spec 决策记录） -->
 
-## 关键决策
+## 要点摘要
 
-（待填写）
+<!-- 实现中的关键技术点、易踩坑的地方 -->
 
-## 实现要点
+## 上手指南
 
-（待填写）
-
-## 最终结论
-
-<!-- 特性关闭后填写 -->
-"#)
-}
-
-fn format_deliverables(feat_id: &str, _title: &str, date: &str) -> String {
-    format!(r#"---
-doc_type: feature-deliverables
-title: "{feat_id} Deliverables"
-date: {date}
-feat_id: "{feat_id}"
-updated: {date}
----
-
-# {feat_id} Deliverables
-
-> 记录结构化产出：实验结果、模型指标、关键数据、产出物路径。
-> 周报生成时自动读取此文件。
-
-## 产出记录
-
-<!-- 每条产出用三级标题，包含日期、类型、结果。示例：
-
-### {date} | 模型评估 | baseline
-
-- **方法**：使用 XX 模型 + YY 数据集
-- **结果**：准确率 92.3%，F1 0.91
-- **结论**：达到基线要求，可进入下一阶段
-- **产出物**：`experiments/baseline/results.json`
-
--->
+<!-- 未来维护者需要知道的最少信息 -->
 "#)
 }
 
@@ -379,19 +387,15 @@ updated: {date}
 
 # {feat_id} Plan
 
-## 实施步骤
+> 可选文件。简单特性可直接指向 ADR Actions，无需填满此文件。
 
-<!-- 列出实施步骤 -->
+## 实施步骤
 
 1.
 
-## 风险评估
+## 风险与依赖
 
-<!-- 列出潜在风险 -->
-
-## 依赖
-
-<!-- 列出依赖的其他特性或外部条件 -->
+<!-- 潜在风险和外部依赖（如无可删除本节） -->
 "#)
 }
 
@@ -420,9 +424,16 @@ fn update_ai_context_features(project_dir: &std::path::Path, _cfg: &config::UvpC
     };
 
     let marker = "<!-- 此列表由 uvp feature new/close 自动维护，不要手动编辑 -->";
-    let new_content = if content.contains(marker) {
-        let re = regex::Regex::new(&format!("(?s){}.*?(?=\n\n|\n$|$)", regex::escape(marker))).unwrap();
-        re.replace(&content, &format!("{marker}\n{features_text}")).to_string()
+    let new_content = if let Some(marker_pos) = content.find(marker) {
+        let before = &content[..marker_pos];
+        let after_marker_start = marker_pos + marker.len();
+        let after_marker = &content[after_marker_start..];
+        // 跳过 marker 之后连续的非空行（即旧的特性列表），保留后续内容
+        let rest = after_marker
+            .find("\n\n")
+            .map(|pos| &after_marker[pos..])
+            .unwrap_or("");
+        format!("{before}{marker}\n{features_text}{rest}")
     } else {
         format!("{content}\n\n### 活跃特性列表\n{marker}\n{features_text}\n")
     };

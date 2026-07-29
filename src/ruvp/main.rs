@@ -6,16 +6,8 @@ mod commands;
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
-#[command(name = "uvp", version = env!("CARGO_PKG_VERSION"), about = "UVP - Vibe Coding 初始化工具")]
+#[command(name = "uvp", version = env!("CARGO_PKG_VERSION"), about = "uvp - Vibe Coding 工作流工具")]
 struct Cli {
-    /// 静默模式
-    #[arg(short, long)]
-    quiet: bool,
-
-    /// 详细输出
-    #[arg(short, long)]
-    verbose: bool,
-
     #[command(subcommand)]
     command: Commands,
 }
@@ -131,6 +123,13 @@ enum Commands {
         #[command(subcommand)]
         command: SelfCommands,
     },
+    /// 启动全局看板（本地 Web 服务器）
+    #[command(alias = "kb")]
+    Kanban {
+        /// 服务器端口
+        #[arg(short, long, default_value = "3000")]
+        port: u16,
+    },
 }
 
 #[derive(Subcommand)]
@@ -140,7 +139,7 @@ enum FeatureCommands {
         /// 特性标题
         title: String,
         /// 关联的 ADR 编号
-        #[arg(long)]
+        #[arg(long, alias = "adr-ref")]
         adr: Option<String>,
     },
     /// 列出所有特性
@@ -161,7 +160,7 @@ enum FeatureCommands {
         /// 新状态
         new_status: String,
     },
-    /// 关闭特性（标记为 verified）
+    /// 关闭特性（标记为 closed）
     Close {
         /// 特性 ID
         feat_id: String,
@@ -252,6 +251,9 @@ fn main() {
             match command {
                 SelfCommands::Update => commands::self_cmd::update(),
             }
+        }
+        Commands::Kanban { port } => {
+            commands::kanban::run(port);
         }
     }
 }

@@ -93,6 +93,19 @@ pub fn action_skip(m: &str)  { println!("  {} {}", style("·").dim(),  style(m).
 pub fn action_fail(m: &str)  { println!("  {} {}", style("✗").red(), m); }
 pub fn action_info(m: &str)  { println!("  → {m}"); }
 
+pub fn styled_cyan(s: &str) -> String { style(s).cyan().to_string() }
+pub fn styled_dim(s: &str) -> String { style(s).dim().to_string() }
+pub fn styled_bold(s: &str) -> String { style(s).bold().to_string() }
+pub fn styled_red(s: &str) -> String { style(s).red().to_string() }
+pub fn styled_green(s: &str) -> String { style(s).green().to_string() }
+pub fn styled_bold_cyan(s: &str) -> String { style(s).bold().cyan().to_string() }
+pub fn styled_bold_yellow(s: &str) -> String { style(s).bold().yellow().to_string() }
+
+pub fn error_msg(msg: &str) { println!("{} {msg}", style("错误").red()); }
+pub fn section_header(num: u8, title: &str) { println!("{}{}. {title}", style("  ").bold(), num); }
+pub fn empty_msg(msg: &str) { println!("{}", style(msg).dim()); }
+pub fn kv_line(key: &str, value: &str) { println!("  {}: {}", key, style(value).cyan()); }
+
 pub fn success_panel(title: &str, body: &str) {
     println!("\n{}", style(title).bold().green());
     for line in body.lines() {

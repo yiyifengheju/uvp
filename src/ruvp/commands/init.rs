@@ -5,7 +5,6 @@ use std::path::{Path, PathBuf};
 use std::thread;
 
 use chrono::Local;
-use console::style;
 use indicatif::ProgressBar;
 
 use crate::common;
@@ -55,7 +54,7 @@ pub fn run(
 
     // ── 目录结构 ──
     let pb2 = ui::step_start("Creating directories");
-    for dir_name in &["docs/adr", "docs/prd", "docs/features", "docs/architecture", "docs/_meta", "src", "reference"] {
+    for dir_name in &["docs/adr", "docs/features", "docs/architecture", "docs/_meta", "src", "reference"] {
         ui::step_update(&pb2, dir_name);
         let d = project_dir.join(dir_name);
         if !d.exists() {
@@ -69,7 +68,7 @@ pub fn run(
 
     // ── MkDocs ──
     let pb3 = ui::step_start("Configuring MkDocs");
-    if !no_mkdocs && cfg.init.auto_mkdocs {
+    if !no_mkdocs && cfg.init.is_auto_mkdocs() {
         if let Some(tmpl) = common::load_builtin_template("mkdocs.yml") {
             ui::step_update(&pb3, "Writing mkdocs.yml");
             match write_file_safe(&project_dir.join("mkdocs.yml"), &tmpl.replace("{project_name}", &project_name)) {
@@ -102,7 +101,7 @@ pub fn run(
 
     // ── Feature Registry ──
     let pb5 = ui::step_start("Creating Feature Registry");
-    if cfg.init.auto_feature_ledger {
+    if cfg.init.is_auto_feature_ledger() {
         if let Some(t) = common::load_builtin_template("feature_registry.yaml") {
             ui::step_update(&pb5, "docs/_meta/feature-registry.yaml");
             if let Err(e) = write_file_safe(&project_dir.join("docs/_meta/feature-registry.yaml"), &t) {
@@ -122,7 +121,7 @@ pub fn run(
 
     // ── AI 上下文 ──
     let pb6 = ui::step_start("Writing AI context");
-    if cfg.init.auto_ai_context {
+    if cfg.init.is_auto_ai_context() {
         if let Some(t) = common::load_builtin_template("ai_context.md") {
             ui::step_update(&pb6, "docs/AI_CONTEXT.md");
             if let Err(e) = write_file_safe(
@@ -146,7 +145,7 @@ pub fn run(
 
     // ── AI 规则 ──
     let pb7 = ui::step_start(&format!("Generating AI rules ({ide})"));
-    if !no_ai_rules && cfg.init.auto_ai_rules {
+    if !no_ai_rules && cfg.init.is_auto_ai_rules() {
         let rule_files = config::ai_rule_files();
         if let Some(&rule_path) = rule_files.get(ide) {
             let target = project_dir.join(rule_path);
@@ -193,8 +192,8 @@ pub fn run(
         }
     }
     if let Some(t) = common::load_builtin_template("roadmap.md") {
-        ui::step_update(&pb8, "docs/prd/roadmap.md");
-        if let Err(e) = write_file_safe(&project_dir.join("docs/prd/roadmap.md"), &t.replace("{project_name}", &project_name).replace("{DATE}", &today())) {
+        ui::step_update(&pb8, "docs/roadmap.md");
+        if let Err(e) = write_file_safe(&project_dir.join("docs/roadmap.md"), &t.replace("{project_name}", &project_name).replace("{DATE}", &today())) {
             ui::step_fail(&pb8, &format!("Failed: {e}")); std::process::exit(1);
         }
     }
@@ -218,7 +217,7 @@ pub fn run(
     let mut uv_init_handle: Option<thread::JoinHandle<bool>> = None;
     let mut pb_uv: Option<ProgressBar> = None;
 
-    if !no_python && cfg.init.auto_uv_init {
+    if !no_python && cfg.init.is_auto_uv_init() {
         if !project_dir.join("pyproject.toml").exists() {
             let pb = ui::step_start("Running uv init ...");
             pb_uv = Some(pb);
@@ -229,7 +228,7 @@ pub fn run(
                 move |_line| {},
             ));
         } else {
-            eprintln!("{}", style("· Skipped — pyproject.toml exists").dim());
+            eprintln!("{}", ui::styled_dim("· Skipped — pyproject.toml exists"));
         }
     }
 
@@ -242,12 +241,12 @@ pub fn run(
         }
         if ok {
             if let Some(ref pb) = pb_uv {
-                pb.finish_with_message(format!("{} {}", style("✓").green(), "Project initialized with uv"));
+                pb.finish_with_message(format!("{} {}", ui::styled_green("✓"), "Project initialized with uv"));
             }
             let main_py = project_dir.join("main.py");
             if main_py.exists() { let _ = fs::remove_file(main_py); }
         } else {
-            eprintln!("{}", style("✗ uv init failed").red());
+            eprintln!("{}", ui::styled_red("✗ uv init failed"));
         }
     }
 
@@ -266,9 +265,9 @@ pub fn run(
         let ok = h.join().unwrap_or(false);
         pb_add.set_style(indicatif::ProgressStyle::with_template("{msg}").unwrap());
         if ok {
-            pb_add.finish_with_message(format!("{} {}", style("✓").green(), "Dependencies installed"));
+            pb_add.finish_with_message(format!("{} {}", ui::styled_green("✓"), "Dependencies installed"));
         } else {
-            pb_add.finish_with_message(format!("{} {}", style("✗").red(), "Dependency installation failed"));
+            pb_add.finish_with_message(format!("{} {}", ui::styled_red("✗"), "Dependency installation failed"));
         }
     }
 
@@ -277,13 +276,13 @@ pub fn run(
     // ══════════════════════════════════════════
     eprintln!(
         "\n{} {}",
-        style("🎉🎉 Initialized project").bold(),
-        style(format!("`{project_name}` at `{}`", project_dir.display())).cyan()
+        ui::styled_bold("🎉🎉 Initialized project"),
+        ui::styled_cyan(&format!("`{project_name}` at `{}`", project_dir.display()))
     );
 
     ui::success_panel(
         "Initialized successfully",
-        "Next: Write PRDs in docs/prd/, then let AI execute via AI_CONTEXT.md",
+        "Next: Record ideas in docs/TODO.md, then let AI execute via AI_CONTEXT.md",
     );
 }
 
@@ -309,6 +308,6 @@ fn find_existing_rule_file(project_dir: &Path) -> Option<PathBuf> {
 
 fn today() -> String { Local::now().format("%Y-%m-%d").to_string() }
 
-fn style_cyan(s: &str) -> String { console::style(s).cyan().to_string() }
-fn style_dim(s: &str) -> String { console::style(s).dim().to_string() }
-fn style_bold_cyan(s: &str) -> String { console::style(s).bold().cyan().to_string() }
+fn style_cyan(s: &str) -> String { ui::styled_cyan(s) }
+fn style_dim(s: &str) -> String { ui::styled_dim(s) }
+fn style_bold_cyan(s: &str) -> String { ui::styled_bold_cyan(s) }

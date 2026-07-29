@@ -9,7 +9,7 @@ use crate::common;
 use crate::config;
 use crate::ui;
 
-pub fn run(check_features: bool, check_adr: bool, _auto_fix: bool) {
+pub fn run(check_features: bool, check_adr: bool, auto_fix: bool) {
     let project_dir = config::find_project_root(None, true).unwrap_or_else(|e| {
         eprintln!("{e}");
         std::process::exit(1);
@@ -24,7 +24,7 @@ pub fn run(check_features: bool, check_adr: bool, _auto_fix: bool) {
     let mut all_issues: Vec<String> = Vec::new();
 
     if check_all || check_features {
-        println!("{}1. 特性闭环检查", console::style("  ").bold());
+        ui::section_header(1, "特性闭环检查");
         let issues = check_feature_closure(&project_dir, &cfg);
         all_issues.extend(issues.iter().cloned());
         if issues.is_empty() {
@@ -37,7 +37,8 @@ pub fn run(check_features: bool, check_adr: bool, _auto_fix: bool) {
     }
 
     if check_all || check_adr {
-        println!("\n{}2. ADR 一致性检查", console::style("  ").bold());
+        println!();
+        ui::section_header(2, "ADR 一致性检查");
         let issues = check_adr_consistency(&project_dir, &cfg);
         all_issues.extend(issues.iter().cloned());
         if issues.is_empty() {
@@ -50,11 +51,36 @@ pub fn run(check_features: bool, check_adr: bool, _auto_fix: bool) {
     }
 
     if check_all {
-        println!("\n{}3. AI 上下文检查", console::style("  ").bold());
+        println!();
+        ui::section_header(3, "AI 上下文检查");
         let issues = check_ai_context(&project_dir);
         all_issues.extend(issues.iter().cloned());
         if issues.is_empty() {
             ui::action_ok("AI 上下文正常");
+        } else {
+            for issue in &issues {
+                ui::action_fail(issue);
+            }
+        }
+
+        println!();
+        ui::section_header(4, "PROJECT_STATE 特性表一致性");
+        let issues = check_project_state_features(&project_dir, &cfg);
+        all_issues.extend(issues.iter().cloned());
+        if issues.is_empty() {
+            ui::action_ok("PROJECT_STATE 特性表一致");
+        } else {
+            for issue in &issues {
+                ui::action_fail(issue);
+            }
+        }
+
+        println!();
+        ui::section_header(5, "文档 Meta Header 检查");
+        let issues = check_docs_meta_header(&project_dir);
+        all_issues.extend(issues.iter().cloned());
+        if issues.is_empty() {
+            ui::action_ok("所有文档均含 front matter");
         } else {
             for issue in &issues {
                 ui::action_fail(issue);
@@ -67,7 +93,13 @@ pub fn run(check_features: bool, check_adr: bool, _auto_fix: bool) {
         println!("{} 所有检查通过！", ui::icon_ok());
     } else {
         println!("{} 发现 {} 个问题", ui::icon_fail(), all_issues.len());
-        ui::action_info("运行 uvp render 更新渲染页面");
+        if auto_fix {
+            println!("\n{} 自动修复中...", ui::styled_cyan("→"));
+            super::render::run(true, true, false);
+            println!("{} 已重新渲染 registry 页面", ui::icon_ok());
+        } else {
+            ui::action_info("运行 uvp check --fix 自动修复，或 uvp render 手动更新");
+        }
     }
 }
 
@@ -87,13 +119,60 @@ fn check_feature_closure(project_dir: &Path, cfg: &config::UvpConfig) -> Vec<Str
             issues.push(format!("{}: 缺少 spec.md", feat.id));
         }
 
-        if feat.status == "verified" {
+        if feat.status == "verified" || feat.status == "closed" {
             let verif_path = feat_dir.join("verification.md");
-            if verif_path.exists() {
-                if let Ok(content) = fs::read_to_string(&verif_path) {
-                    if !content.contains("已验证") {
-                        issues.push(format!("{}: 状态为 verified 但 verification.md 未标记为已验证", feat.id));
+            if !verif_path.exists() {
+                issues.push(format!("{}: 状态为 {} 但缺少 verification.md", feat.id, feat.status));
+            } else if let Ok(content) = fs::read_to_string(&verif_path) {
+                if content.contains("未验证") && !content.contains("已验证") {
+                    issues.push(format!("{}: 状态为 {} 但 verification.md 未标记为已验证", feat.id, feat.status));
+                }
+
+                // P5-12: 算法类 Feature 检查量化证据
+                let spec_path = feat_dir.join("spec.md");
+                let is_algo_feature = spec_path.exists()
+                    && fs::read_to_string(&spec_path).map(|s| {
+                        let lower = s.to_lowercase();
+                        lower.contains("精度") || lower.contains("准确率")
+                            || lower.contains("accuracy") || lower.contains("recall")
+                            || lower.contains("sensitivity") || lower.contains("ppv")
+                            || lower.contains("f1") || lower.contains("se ")
+                            || lower.contains("信号") || lower.contains("波形")
+                            || lower.contains("分类") || lower.contains("检测")
+                    }).unwrap_or(false);
+
+                if is_algo_feature {
+                    let has_metrics = content.contains("metrics:") && !content.contains("metrics: {}");
+                    if !has_metrics {
+                        issues.push(format!("{}: 算法类特性但 verification.md 缺少量化指标（metrics 为空）", feat.id));
                     }
+                }
+            }
+
+            let context_path = feat_dir.join("context.md");
+            if !context_path.exists() {
+                issues.push(format!("{}: 状态为 {} 但缺少 context.md", feat.id, feat.status));
+            } else if let Ok(content) = fs::read_to_string(&context_path) {
+                let is_template = content.contains("<!-- 为什么这样选")
+                    && !content.lines().any(|l| {
+                        let trimmed = l.trim();
+                        !trimmed.is_empty()
+                            && !trimmed.starts_with('#')
+                            && !trimmed.starts_with('>')
+                            && !trimmed.starts_with("<!--")
+                            && !trimmed.starts_with("---")
+                            && !trimmed.starts_with("planned")
+                            && !trimmed.starts_with("doc_type")
+                            && !trimmed.starts_with("title:")
+                            && !trimmed.starts_with("date:")
+                            && !trimmed.starts_with("feat_id:")
+                            && !trimmed.starts_with("updated:")
+                            && !trimmed.contains("Distill")
+                            && !trimmed.contains("压缩上下文")
+                            && !trimmed.contains("竣工")
+                    });
+                if is_template {
+                    issues.push(format!("{}: 状态为 {} 但 context.md 仍为空模板", feat.id, feat.status));
                 }
             }
         }
@@ -189,4 +268,84 @@ fn parse_front_matter(content: &str) -> std::collections::HashMap<String, String
     }
 
     result
+}
+
+fn check_project_state_features(project_dir: &Path, cfg: &config::UvpConfig) -> Vec<String> {
+    let mut issues = Vec::new();
+    let ps_path = project_dir.join("docs/PROJECT_STATE.md");
+
+    if !ps_path.exists() {
+        issues.push("docs/PROJECT_STATE.md 不存在".into());
+        return issues;
+    }
+
+    let content = match fs::read_to_string(&ps_path) {
+        Ok(c) => c,
+        Err(_) => {
+            issues.push("无法读取 docs/PROJECT_STATE.md".into());
+            return issues;
+        }
+    };
+
+    let data = common::load_feature_registry(project_dir, cfg);
+
+    for feat in &data.features {
+        if feat.status == "deprecated" || feat.status == "removed" {
+            continue;
+        }
+        if !content.contains(&feat.id) {
+            issues.push(format!("PROJECT_STATE.md 缺少特性 {} ({})", feat.id, feat.title));
+        }
+    }
+
+    issues
+}
+
+fn check_docs_meta_header(project_dir: &Path) -> Vec<String> {
+    let mut issues = Vec::new();
+    let docs_dir = project_dir.join("docs");
+
+    if !docs_dir.exists() {
+        return issues;
+    }
+
+    fn walk_md(dir: &Path, project_dir: &Path, issues: &mut Vec<String>) {
+        let entries = match fs::read_dir(dir) {
+            Ok(e) => e,
+            Err(_) => return,
+        };
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if path.is_dir() {
+                walk_md(&path, project_dir, issues);
+            } else if path.extension().is_some_and(|e| e == "md") {
+                let content = match fs::read_to_string(&path) {
+                    Ok(c) => c,
+                    Err(_) => continue,
+                };
+                if !content.starts_with("---") {
+                    let rel = path.strip_prefix(project_dir).unwrap_or(&path);
+                    issues.push(format!("{}: 缺少 YAML front matter", rel.to_string_lossy().replace('\\', "/")));
+                } else {
+                    let rest = &content[3..];
+                    if let Some(end) = rest.find("---") {
+                        let fm = &rest[..end];
+                        let has_title = fm.lines().any(|l| l.starts_with("title:") || l.starts_with("title :"));
+                        let has_date = fm.lines().any(|l| l.starts_with("date:") || l.starts_with("date :"));
+                        if !has_title || !has_date {
+                            let rel = path.strip_prefix(project_dir).unwrap_or(&path);
+                            let missing: Vec<&str> = [
+                                if !has_title { Some("title") } else { None },
+                                if !has_date { Some("date") } else { None },
+                            ].iter().filter_map(|x| *x).collect();
+                            issues.push(format!("{}: front matter 缺少 {}", rel.to_string_lossy().replace('\\', "/"), missing.join(", ")));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    walk_md(&docs_dir, project_dir, &mut issues);
+    issues
 }

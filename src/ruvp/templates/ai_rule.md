@@ -25,7 +25,8 @@ project: "{project_name}"
 
 - **编程任务**：通过 Skill 工具调用 `uvp-workflow`，获取详细步骤指导
 - **闭环检查（verification.md / context.md）**：模板已内联在 `docs/AI_CONTEXT.md` 中，**不需要**再读 skill 文件
-- **只有需要详细模板细节时**才调用 skill（如实验记录、周报格式）
+- **只有需要详细模板细节时**才调用 skill（如验证证据清单、周报格式）
+- **实验产出**：用户指定保存路径时，按 `uvp-feature-lifecycle` 中的实验产出模板填写，文件名以日期开头（如 `2026-07-29-xxx.md`）
 
 ---
 

@@ -60,7 +60,13 @@ fn render_features_index(project_dir: &Path, cfg: &config::UvpConfig, check_only
         *status_count.entry(feat.status.clone()).or_insert(0) += 1;
     }
 
-    let today = Local::now().format("%Y-%m-%d").to_string();
+    let index_path = project_dir.join("docs/features/index.md");
+
+    let today = if check_only {
+        extract_date_from_file(&index_path).unwrap_or_else(|| Local::now().format("%Y-%m-%d").to_string())
+    } else {
+        Local::now().format("%Y-%m-%d").to_string()
+    };
 
     let mut lines = vec![
         "---".to_string(),
@@ -78,7 +84,7 @@ fn render_features_index(project_dir: &Path, cfg: &config::UvpConfig, check_only
         "|------|------|".to_string(),
     ];
 
-    for s in ["planned", "in_progress", "implemented", "verified"] {
+    for s in ["planned", "implementing", "verifying", "verified", "closed"] {
         if let Some(count) = status_count.get(s) {
             lines.push(format!("| {s} | {count} |"));
         }
@@ -201,7 +207,13 @@ fn render_adr_registry(project_dir: &Path, cfg: &config::UvpConfig, check_only: 
         *status_count.entry(status.clone()).or_insert(0) += 1;
     }
 
-    let today = Local::now().format("%Y-%m-%d").to_string();
+    let registry_path = adr_dir.join("registry.md");
+
+    let today = if check_only {
+        extract_date_from_file(&registry_path).unwrap_or_else(|| Local::now().format("%Y-%m-%d").to_string())
+    } else {
+        Local::now().format("%Y-%m-%d").to_string()
+    };
 
     let mut lines = vec![
         "---".to_string(),
@@ -246,7 +258,6 @@ fn render_adr_registry(project_dir: &Path, cfg: &config::UvpConfig, check_only: 
 
     let expected_content = lines.join("\n") + "\n";
 
-    let registry_path = adr_dir.join("registry.md");
     if check_only {
         if registry_path.exists() {
             match fs::read_to_string(&registry_path) {
@@ -275,4 +286,10 @@ fn render_adr_registry(project_dir: &Path, cfg: &config::UvpConfig, check_only: 
             }
         }
     }
+}
+
+fn extract_date_from_file(path: &Path) -> Option<String> {
+    let content = fs::read_to_string(path).ok()?;
+    let re = Regex::new(r"(?m)^date:\s*(\d{4}-\d{2}-\d{2})").unwrap();
+    re.captures(&content).map(|c| c[1].to_string())
 }

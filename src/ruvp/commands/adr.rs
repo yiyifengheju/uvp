@@ -90,9 +90,9 @@ pub fn run(title: &str, from_obsidian: Option<&str>, status: &str, open_file: bo
     ui::step_done(&pb, &format!("ADR #{number:04} created: {title}"));
 
     // 输出详情
-    println!("  编号: {}", console::style(format!("{number:04}")).cyan());
+    println!("  编号: {}", ui::styled_cyan(&format!("{number:04}")));
     println!("  文件: {}", filepath.strip_prefix(&project_dir).unwrap_or(&filepath).display());
-    println!("  状态: {}", console::style(status).cyan());
+    println!("  状态: {}", ui::styled_cyan(status));
     if let Some(stem) = &obsidian_note_stem {
         println!("  引用: [[{stem}]]");
     }

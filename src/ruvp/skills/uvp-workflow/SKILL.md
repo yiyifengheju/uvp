@@ -39,7 +39,7 @@ ADR 标题要求：描述**做什么**和**为什么**，避免模糊标题。
 
 ```bash
 uvp f list               # 检查已有 Feature
-uvp f new "标题" --adr-ref NNNN   # 创建新 Feature
+uvp f new "标题" [--adr NNNN]   # 创建新 Feature
 ```
 
 | 情况 | 操作 |
@@ -76,7 +76,6 @@ uvp f new "标题" --adr-ref NNNN   # 创建新 Feature
 | 如果你... | 还要更新... |
 |-----------|------------|
 | 修改了 API 接口 | `spec.md` 接口定义 |
-| 运行了实验/试错 | `deliverables.md`（详见 uvp-file-coupling） |
 | 发现新的约束 | `spec.md` 约束部分 |
 
 ---
@@ -85,8 +84,9 @@ uvp f new "标题" --adr-ref NNNN   # 创建新 Feature
 
 1. 运行测试 `pytest tests/`
 2. 逐项检查 `spec.md` 验收标准
-3. 填写 `verification.md`（详见 `uvp-feature-lifecycle` skill）
+3. 填写 `verification.md`（按证据清单逐项提供：量化表★ + 可复现命令★ + 可视化）
 4. **任何标准未通过** → 回到 Step 4 修复，不要关闭 Feature
+5. 复杂任务如有独立实验产出，在 verification.md 中引用结果路径即可
 
 ```bash
 uvp f close FEAT-XXX     # 全部通过后才执行
@@ -96,7 +96,7 @@ uvp f close FEAT-XXX     # 全部通过后才执行
 
 ## Step 6: DISTILL — 知识提炼
 
-1. 强制更新 `context.md`（关键决策、经验教训、架构影响）
+1. 强制更新 `context.md`（既定事实上下文：当前状态、要点摘要、上手指南）
 2. 强制更新 `docs/PROJECT_STATE.md`（系统最新状态）
 3. 强制更新 `docs/AI_CONTEXT.md`（全局上下文）
 
@@ -127,5 +127,5 @@ uvp f close FEAT-XXX     # 全部通过后才执行
 
 ---
 
-*详细模板（spec/changelog/verification/context/deliverables）见 `uvp-feature-lifecycle` skill*
+*详细模板（spec/changelog/verification/context）见 `uvp-feature-lifecycle` skill*
 *文件联动规则详见 `uvp-file-coupling` skill*

@@ -1,0 +1,10 @@
+# UVP 项目配置文件
+# 由 uvp init 自动生成，仅包含可按项目覆盖的配置项
+# 全局默认配置见 ~/.uvp/uvp.toml，此处配置优先级高于全局
+
+[adr]
+# naming = "sequential"
+
+[obsidian]
+# vault = ""
+# exclude_dirs = ["node_modules", ".git", "assets", ".obsidian"]

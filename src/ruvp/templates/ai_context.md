@@ -18,7 +18,7 @@ project: "{project_name}"
 详见 skill：`.claude/skills/uvp-workflow/SKILL.md`
 
 ### 2. 文件联动：改代码必须同步文档
-修改 `src/` 后**立即**更新 `changelog.md`；接口变更同步 `spec.md`；产出记录到 `deliverables.md`。
+修改 `src/` 后**立即**更新 `changelog.md`；接口变更同步 `spec.md`。
 详见 skill：`.claude/skills/uvp-file-coupling/SKILL.md`
 
 ### 3. Feature 生命周期
@@ -40,10 +40,9 @@ Feature 有 6 种状态（idea→planned→implementing→verifying→verified�
 | 你要做什么 | 命令 | 必须同步更新 |
 |-----------|------|-------------|
 | 技术决策 | `uvp a "决策标题"` | ADR registry 自动更新 |
-| 创建 Feature | `uvp f new "标题" --adr-ref NNNN` | 回写 ADR 的 `related_features` |
+| 创建 Feature | `uvp f new "标题" [--adr NNNN]` | 回写 ADR 的 `related_features` |
 | 修改代码 | — | `changelog.md`（必须！）、`spec.md`（如接口变） |
-| 运行实验 | — | `deliverables.md` |
-| 完成验证 | — | `verification.md` |
+| 完成验证 | — | `verification.md`（复杂任务引用实验结果路径） |
 | 关闭 Feature | `uvp f close FEAT-NNN` | `context.md`、`PROJECT_STATE.md` |
 | 创建文档 | — | 必须包含 meta 头 |
 | 写周报 | — | `docs/周报/YYYYMMWNN.md`，按大纲模板 |

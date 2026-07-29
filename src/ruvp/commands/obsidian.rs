@@ -20,14 +20,14 @@ pub fn run(command: ObsidianCommands, vault: Option<&str>) {
         .unwrap_or_default();
 
     if vault_str.is_empty() {
-        println!("{} 未配置 Obsidian Vault 路径", console::style("错误").red());
+        ui::error_msg("未配置 Obsidian Vault 路径");
         println!("请编辑 ~/.uvp/uvp.toml，设置 [obsidian] vault = \"<path>\"");
         std::process::exit(1);
     }
 
     let vault_path = PathBuf::from(shellexpand::tilde(&vault_str).to_string());
     if !vault_path.exists() {
-        println!("{} Vault 路径不存在: {}", console::style("错误").red(), vault_path.display());
+        ui::error_msg(&format!("Vault 路径不存在: {}", vault_path.display()));
         std::process::exit(1);
     }
 
@@ -40,17 +40,27 @@ pub fn run(command: ObsidianCommands, vault: Option<&str>) {
 }
 
 fn obsidian_pull(project_dir: &Path, vault: &Path, exclude_dirs: &[String], dry_run: bool) {
+    let project_name = project_dir.file_name()
+        .map(|n| n.to_string_lossy().to_string())
+        .unwrap_or_else(|| "project".to_string());
+    let vault_ref_src = vault.join("Projects").join(&project_name).join("reference");
     let ref_dst = project_dir.join("reference");
 
+    if !vault_ref_src.exists() {
+        ui::error_msg(&format!("Vault 中不存在路径: {}", vault_ref_src.display()));
+        println!("  请确认 Obsidian Vault 中有 Projects/{project_name}/reference/ 目录");
+        return;
+    }
+
     if dry_run {
-        println!("{} 模拟模式 - 不执行实际操作\n", console::style("").bold());
-        let pulled = sync_directory(vault, &ref_dst, true, Some(exclude_dirs));
+        println!("{} 模拟模式 - 不执行实际操作\n", ui::styled_bold("▶"));
+        let pulled = sync_directory(&vault_ref_src, &ref_dst, true, Some(exclude_dirs));
         print_sync_result(&pulled, true, "拉取");
         return;
     }
 
     let pb = ui::step_start("Pulling from Obsidian");
-    let pulled = sync_directory(vault, &ref_dst, false, Some(exclude_dirs));
+    let pulled = sync_directory(&vault_ref_src, &ref_dst, false, Some(exclude_dirs));
 
     if pulled.is_empty() {
         ui::step_skip(&pb, "No files to pull");
@@ -58,26 +68,34 @@ fn obsidian_pull(project_dir: &Path, vault: &Path, exclude_dirs: &[String], dry_
         ui::step_done(&pb, &format!("Pulled {} files", pulled.len()));
         for f in &pulled {
             std::thread::sleep(std::time::Duration::from_millis(ui::get_delay_ms()));
-            println!("  {} {}", console::style("✓").green(), console::style(f).cyan());
+            println!("  {} {}", ui::styled_green("✓"), ui::styled_cyan(f));
         }
     }
 }
 
 fn obsidian_sync(project_dir: &Path, vault: &Path, exclude_dirs: &[String], dry_run: bool) {
+    let project_name = project_dir.file_name()
+        .map(|n| n.to_string_lossy().to_string())
+        .unwrap_or_else(|| "project".to_string());
+    let vault_ref_dir = vault.join("Projects").join(&project_name).join("reference");
     let ref_dir = project_dir.join("reference");
 
     if dry_run {
-        println!("{} 模拟模式 - 不执行实际操作\n", console::style("").bold());
-        let ref_pulled = sync_directory(vault, &ref_dir, true, Some(exclude_dirs));
+        println!("{} 模拟模式 - 不执行实际操作\n", ui::styled_bold("▶"));
+        let ref_pulled = if vault_ref_dir.exists() {
+            sync_directory(&vault_ref_dir, &ref_dir, true, Some(exclude_dirs))
+        } else {
+            Vec::new()
+        };
         let ref_pushed = if ref_dir.exists() {
-            sync_directory(&ref_dir, vault, true, Some(exclude_dirs))
+            sync_directory(&ref_dir, &vault_ref_dir, true, Some(exclude_dirs))
         } else {
             Vec::new()
         };
         if !ref_pulled.is_empty() { print_sync_result(&ref_pulled, true, "拉取"); }
         if !ref_pushed.is_empty() { print_sync_result(&ref_pushed, true, "推送"); }
         if ref_pulled.is_empty() && ref_pushed.is_empty() {
-            println!("{}没有需要同步的文件", console::style("").dim());
+            ui::empty_msg("没有需要同步的文件");
         }
         return;
     }
@@ -86,12 +104,17 @@ fn obsidian_sync(project_dir: &Path, vault: &Path, exclude_dirs: &[String], dry_
 
     // Pull: Vault → 项目 reference/
     ui::step_update(&pb, "Pulling from Vault");
-    let ref_pulled = sync_directory(vault, &ref_dir, false, Some(exclude_dirs));
+    let ref_pulled = if vault_ref_dir.exists() {
+        sync_directory(&vault_ref_dir, &ref_dir, false, Some(exclude_dirs))
+    } else {
+        Vec::new()
+    };
 
     // Push: 项目 reference/ → Vault
     ui::step_update(&pb, "Pushing to Vault");
     let ref_pushed = if ref_dir.exists() {
-        sync_directory(&ref_dir, vault, false, Some(exclude_dirs))
+        let _ = fs::create_dir_all(&vault_ref_dir);
+        sync_directory(&ref_dir, &vault_ref_dir, false, Some(exclude_dirs))
     } else {
         Vec::new()
     };
@@ -179,19 +202,19 @@ fn walkdir(dir: &Path) -> Result<Vec<PathBuf>, std::io::Error> {
 
 fn print_sync_result(files: &[String], dry_run: bool, action: &str) {
     if files.is_empty() {
-        println!("{}没有需要同步的文件", console::style("").dim());
+        ui::empty_msg("没有需要同步的文件");
     } else if dry_run {
-        println!("{}将要{}的文件:", console::style("").bold(), action);
+        println!("{}将要{}的文件:", ui::styled_bold("▶"), action);
         for f in files {
-            println!("  {}", console::style(f).cyan());
+            println!("  {}", ui::styled_cyan(f));
         }
     } else {
-        println!("{}{}完成：{} 个文件", console::style("").green(), action, files.len());
+        println!("{}{}完成：{} 个文件", ui::styled_green("✓"), action, files.len());
         for f in files.iter().take(10) {
-            println!("  {}", console::style(f).dim());
+            println!("  {}", ui::styled_dim(f));
         }
         if files.len() > 10 {
-            println!("  {}... 还有 {} 个文件", console::style("").dim(), files.len() - 10);
+            println!("  {}... 还有 {} 个文件", ui::styled_dim(""), files.len() - 10);
         }
     }
 }

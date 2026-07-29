@@ -1,8 +1,8 @@
 [package]
 name = "uvp"
-version = "2026.6.0"
+version = "2026.7.0"
 edition = "2024"
-description = "uv plus extension tool - Vibe Coding 初始化工具"
+description = "uvp - Vibe Coding 工作流工具"
 
 [[bin]]
 name = "uvp"
@@ -13,6 +13,7 @@ clap = { version = "4", features = ["derive"] }
 toml = "1.1"
 serde = { version = "1", features = ["derive"] }
 serde_yaml = "0.9"
+serde_json = "1"
 dirs = "6"
 chrono = "0.4"
 open = "5"
@@ -21,6 +22,11 @@ console = "0.16"
 indicatif = "0.18"
 shellexpand = "3"
 self_update = { version = "0.44", features = ["archive-tar", "archive-zip", "compression-flate2", "compression-zip-deflate"] }
+axum = "0.8"
+tokio = { version = "1", features = ["full"] }
+rust-embed = { version = "8", features = ["mime-guess"] }
+tower-http = { version = "0.6", features = ["cors", "fs"] }
+mime_guess = "2"
 
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3", features = ["winbase", "handleapi", "processenv"] }

@@ -20,18 +20,18 @@ description: "文件修改联动规则：修改文件时必须同步更新关联
 | 3 | 创建 Feature | `feature-registry.yaml` + `docs/features/index.md` | ✅ `uvp f new` 自动 |
 | 4 | **修改 src/ 代码** | **`FEAT-xxx/changelog.md`** | ❌ **手动（最重要！）** |
 | 5 | 修改 API/接口 | `FEAT-xxx/spec.md` 接口定义 | ❌ 手动 |
-| 6 | 运行实验/试错 | `FEAT-xxx/deliverables.md` | ❌ 手动 |
-| 7 | 完成验证 | `FEAT-xxx/verification.md` | ❌ 手动 |
+| 6 | 完成验证 | `FEAT-xxx/verification.md` | ❌ 手动 |
 
 ### 🟡 应该遵守
 
 | # | 当你... | 应该同步更新... |
 |---|---------|----------------|
-| 8 | Feature 状态变更 | `feature-registry.yaml`（`uvp f close` 自动） |
-| 9 | 文档变更影响项目事实 | `docs/AI_CONTEXT.md` 第三节 |
-| 10 | 更新 spec 验收标准 | 重新运行验证 |
-| 11 | 关闭 Feature | `FEAT-xxx/context.md` |
-| 12 | 关闭 Feature | `docs/PROJECT_STATE.md` |
+| 7 | Feature 状态变更 | `feature-registry.yaml`（`uvp f close` 自动） |
+| 8 | 文档变更影响项目事实 | `docs/AI_CONTEXT.md` 第三节 |
+| 9 | 更新 spec 验收标准 | 重新运行验证 |
+| 10 | 关闭 Feature | `FEAT-xxx/context.md` |
+| 11 | 关闭 Feature | `docs/PROJECT_STATE.md` |
+| 12 | 关闭 Feature | `docs/roadmap.md`（AI 语义匹配，追加 `$FEAT-xxx` 标签） |
 
 ---
 
@@ -85,40 +85,12 @@ related_features:
 
 ---
 
-## Experiment 记录（Rule #6 详解）
-
-**必须记录**: 算法对比、参数调优、架构方案比较、A/B 测试
-**可跳过**: 已有模式的简单应用、小配置变更
-
-```markdown
-# Experiment: [标题]
-
-## Hypothesis
-[预期结果和原因]
-
-## Setup
-- Baseline: [当前方案 + 指标]
-- Candidate: [新方案]
-- Data: [数据集、规模]
-
-## Results
-| Metric | Baseline | Candidate | Winner |
-|--------|----------|-----------|--------|
-| Accuracy | 85% | 93% | **B** |
-| Speed | 100ms | 80ms | **B** |
-
-## Conclusion
-✅ ADOPT / ❌ REJECT / 🔄 ITERATE: [选择和原因]
-```
-
----
-
 ## 自检清单
 
 修改文件后问自己：
 - [ ] 改了 src/ → changelog 更新了吗？
 - [ ] 改了接口 → spec 同步了吗？
-- [ ] 做了实验 → deliverables 记录了吗？
+- [ ] 做了实验 → verification 引用了结果路径吗？
 - [ ] 关闭 Feature → context + PROJECT_STATE 更新了吗？
 
 验证：`uvp check`

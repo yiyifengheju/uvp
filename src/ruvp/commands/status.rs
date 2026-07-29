@@ -10,7 +10,7 @@ use crate::ui;
 
 pub fn run(open_file: bool, onboard: bool) {
     if onboard {
-        println!("{} --onboard 功能即将上线（本地实时状态面板）", console::style("coming soon").cyan().bold());
+        println!("{} --onboard 功能即将上线（本地实时状态面板）", ui::styled_bold_cyan("coming soon"));
         println!("  当前可用: uvp status（终端）或 uvp status --open（浏览器）");
         return;
     }
@@ -58,7 +58,7 @@ fn display_project_status(project_dir: &Path, cfg: &config::UvpConfig) {
     let git_info = get_git_info(project_dir);
 
     // 构建状态面板
-    println!("{}: {}", console::style("项目").bold(), project_name);
+    println!("{}: {}", ui::styled_bold("项目"), project_name);
     println!("ADR: {total_adr} 个");
     if !adr_status.is_empty() {
         let detail: Vec<String> = adr_status.iter().map(|(k, v)| format!("{v} {k}")).collect();
@@ -72,12 +72,12 @@ fn display_project_status(project_dir: &Path, cfg: &config::UvpConfig) {
     }
 
     // 当前活跃 Feature
-    if let Some(&count) = feat_status.get("in_progress") {
+    if let Some(&count) = feat_status.get("implementing") {
         if count > 0 {
             let data = common::load_feature_registry(project_dir, cfg);
-            let active: Vec<_> = data.features.iter().filter(|f| f.status == "in_progress").collect();
+            let active: Vec<_> = data.features.iter().filter(|f| f.status == "implementing").collect();
             if !active.is_empty() {
-                println!("\n{}进行中:", console::style("").bold().yellow());
+                println!("\n{}进行中:", ui::styled_bold_yellow(""));
                 for f in active {
                     println!("  {}（{}）", f.id, f.title);
                 }
@@ -205,7 +205,7 @@ th {{ background-color: #667eea; color: white; }}
 <div class="card"><h2 style="color:#667eea">Git 信息</h2><p><strong>分支:</strong> {}</p><p><strong>最近提交:</strong> {}</p></div>
 <div class="card"><h2 style="color:#667eea">Feature 列表</h2><table><thead><tr><th>ID</th><th>标题</th><th>状态</th><th>创建日期</th><th>更新日期</th></tr></thead><tbody>{features_rows}</tbody></table></div>
 </body></html>"#,
-        feat_status.get("in_progress").unwrap_or(&0),
+        feat_status.get("implementing").unwrap_or(&0),
         feat_status.get("verified").unwrap_or(&0),
         git_info.get("branch").unwrap_or(&"N/A".into()),
         git_info.get("last_commit").unwrap_or(&"N/A".into()),

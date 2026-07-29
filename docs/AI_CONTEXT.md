@@ -16,7 +16,7 @@
 
 ### Step 2: Define
 - 创建或更新 FEAT-xxx/spec.md
-  - 新特性：`vup feature new "标题"`
+  - 新特性：`vup feature new "标题" [--adr NNNN]`
   - 已有特性：确认对应的 FEAT 编号
 - spec.md 必须写清楚：接口、行为、约束
 - 在 ADR 中添加关联的 FEAT 编号
@@ -78,10 +78,32 @@ AI 在执行任务时，修改某些文件必须同步修改关联文件：
 
 ### 当前项目状态
 - 项目名称：ai-uvp
-- 技术栈：（待填写）
-- 当前阶段：初始化
-- 优先目标：（待填写）
+- 技术栈：Rust (edition 2024) + clap 4 + serde + MkDocs Material
+- 当前阶段：Beta
+- 优先目标：稳定性打磨、Bug 修复、文档完善
 - 禁止事项：
   - 不新增未经确认的第三方服务
-  - 不修改数据库 schema 而不更新 migration
   - 不修改 feature spec 而直接改代码
+
+
+### 活跃特性列表
+<!-- 此列表由 uvp feature new/close 自动维护，不要手动编辑 -->
+- FEAT-001: Feature Ledger 系统 (implemented)
+- FEAT-002: 项目初始化 (uvp init) (implemented)
+- FEAT-003: ADR 管理 (uvp adr) (implemented)
+- FEAT-004: 特性生命周期管理 (uvp feature) (implemented)
+- FEAT-005: Obsidian 同步 (uvp obsidian) (implemented)
+- FEAT-006: 状态展示 (uvp status) (implemented)
+- FEAT-007: 配置管理 (uvp config) (implemented)
+- FEAT-008: 文件头 Meta 管理 (implemented)
+- FEAT-009: 文档一致性检查 (uvp check) (implemented)
+- FEAT-010: 项目打包与分发 (implemented)
+- FEAT-011: Mkdocs 页面渲染 (uvp render) (implemented)
+- FEAT-012: 终端显示设计 (uvp UI) (implemented)
+- FEAT-013: IDE 规则生成与 Skill 部署 (uvp ide) (implemented)
+- FEAT-014: TODO 管理 (uvp todo) (implemented)
+- FEAT-015: 6步闭环工作流 (uvp-workflow skill) (implemented)
+- FEAT-016: Feature 生命周期模板 (uvp-feature-lifecycle skill) (implemented)
+- FEAT-017: 文件修改联动规则 (uvp-file-coupling skill) (implemented)
+- FEAT-018: 周报生成 (uvp-weekly-report skill) (implemented)
+- FEAT-019: 全局看板 (uvp kanban) (planned)

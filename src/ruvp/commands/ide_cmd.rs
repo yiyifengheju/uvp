@@ -86,6 +86,6 @@ pub fn run(tool: &str) {
     println!();
     ui::success_panel(
         &format!("IDE 配置完成: {tool}"),
-        &format!("规则文件: {}", console::style(rule_path).cyan()),
+        &format!("规则文件: {}", ui::styled_cyan(rule_path)),
     );
 }

@@ -11,3 +11,4 @@ pub mod render;
 pub mod config_cmd;
 pub mod todo_cmd;
 pub mod self_cmd;
+pub mod kanban;
