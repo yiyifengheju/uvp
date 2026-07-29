@@ -194,14 +194,14 @@ fn check_adr_consistency(project_dir: &Path, cfg: &config::UvpConfig) -> Vec<Str
         return issues;
     }
 
-    if !adr_dir.join("registry.md").exists() {
-        issues.push("docs/adr/registry.md 不存在".into());
+    if !adr_dir.join("index.md").exists() {
+        issues.push("docs/adr/index.md 不存在".into());
     }
 
     if let Ok(entries) = fs::read_dir(&adr_dir) {
         for entry in entries.flatten() {
             let name = entry.file_name().to_string_lossy().to_string();
-            if !name.ends_with(".md") || name == "template.md" || name == "registry.md" {
+            if !name.ends_with(".md") || name == "template.md" || name == "index.md" {
                 continue;
             }
             let content = match fs::read_to_string(entry.path()) {

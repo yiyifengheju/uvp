@@ -103,7 +103,7 @@ fn count_adr_status(adr_dir: &Path) -> std::collections::HashMap<String, i32> {
     if let Ok(entries) = fs::read_dir(adr_dir) {
         for entry in entries.flatten() {
             let name = entry.file_name().to_string_lossy().to_string();
-            if !name.ends_with(".md") || name == "template.md" || name == "registry.md" {
+            if !name.ends_with(".md") || name == "template.md" || name == "index.md" {
                 continue;
             }
             if let Ok(content) = fs::read_to_string(entry.path()) {

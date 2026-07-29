@@ -154,12 +154,12 @@ fn walkdir(dir: &Path) -> Result<Vec<std::path::PathBuf>, std::io::Error> {
     Ok(result)
 }
 
-fn update_registry(adr_dir: &Path, _project_dir: &Path) {
+fn update_registry(adr_dir: &Path, project_dir: &Path) {
     if !adr_dir.exists() {
         return;
     }
 
-    let mut entries: Vec<(String, String, String, String, String)> = Vec::new();
+    let mut entries: Vec<(String, String, String, String, String, String)> = Vec::new();
 
     if let Ok(files) = fs::read_dir(adr_dir) {
         let mut file_list: Vec<_> = files.flatten().collect();
@@ -167,7 +167,7 @@ fn update_registry(adr_dir: &Path, _project_dir: &Path) {
 
         for f in &file_list {
             let name = f.file_name().to_string_lossy().to_string();
-            if !name.ends_with(".md") || name == "template.md" || name == "registry.md" {
+            if !name.ends_with(".md") || name == "template.md" || name == "index.md" {
                 continue;
             }
             let content = match fs::read_to_string(f.path()) {
@@ -203,17 +203,45 @@ fn update_registry(adr_dir: &Path, _project_dir: &Path) {
                         .unwrap_or_default()
                 });
 
-            entries.push((number, title, status, feat_ref, date_str));
+            entries.push((number, name, title, status, feat_ref, date_str));
         }
     }
 
-    // 统计状态
+    // Step 1: Write adr-registry.yaml (single source of truth)
+    let yaml_path = project_dir.join("docs/_meta/adr-registry.yaml");
+    let mut yaml_lines = vec![
+        "# ADR Registry".to_string(),
+        "# 此文件由 uvp 自动维护，记录所有架构决策记录的状态".to_string(),
+        "# AI 读取此文件判断 ADR 状态和关联关系".to_string(),
+        String::new(),
+        "adrs:".to_string(),
+    ];
+
+    for (number, filename, title, status, feat_ref, date_str) in &entries {
+        yaml_lines.push(format!("- id: ADR-{number}"));
+        yaml_lines.push(format!("  title: {title}"));
+        yaml_lines.push(format!("  status: {status}"));
+        yaml_lines.push(format!("  file: {filename}"));
+        let features: Vec<&str> = if feat_ref == "-" {
+            vec![]
+        } else {
+            feat_ref.split(',').map(|s| s.trim()).filter(|s| !s.is_empty()).collect()
+        };
+        yaml_lines.push(format!("  related_features: [{}]", features.join(", ")));
+        yaml_lines.push(format!("  date: {date_str}"));
+    }
+
+    if let Err(e) = fs::write(&yaml_path, yaml_lines.join("\n") + "\n") {
+        eprintln!("{} 写入 adr-registry.yaml 失败: {e}", ui::icon_fail());
+        return;
+    }
+
+    // Step 2: Render index.md (output derived from yaml)
     let mut status_count: std::collections::HashMap<String, i32> = std::collections::HashMap::new();
-    for (_, _, status, _, _) in &entries {
+    for (_, _, _, status, _, _) in &entries {
         *status_count.entry(status.clone()).or_insert(0) += 1;
     }
 
-    // 生成 registry 内容
     let mut lines = vec!["# ADR Registry\n".to_string()];
     lines.push("## 状态概览\n".to_string());
     lines.push("| 状态 | 数量 |".to_string());
@@ -244,15 +272,14 @@ fn update_registry(adr_dir: &Path, _project_dir: &Path) {
     if entries.is_empty() {
         lines.push("| （暂无） | | | | |".to_string());
     } else {
-        for (number, title, status, feat_ref, date_str) in &entries {
+        for (number, _, title, status, feat_ref, date_str) in &entries {
             let emoji = status_emoji(status);
             lines.push(format!("| {number} | {title} | {emoji} {status} | {feat_ref} | {date_str} |"));
         }
     }
 
-    let registry_path = adr_dir.join("registry.md");
-    if let Err(e) = fs::write(&registry_path, lines.join("\n") + "\n") {
-        eprintln!("{} 写入 registry 失败: {e}", ui::icon_fail());
-        return;
+    let index_path = adr_dir.join("index.md");
+    if let Err(e) = fs::write(&index_path, lines.join("\n") + "\n") {
+        eprintln!("{} 写入 index.md 失败: {e}", ui::icon_fail());
     }
 }

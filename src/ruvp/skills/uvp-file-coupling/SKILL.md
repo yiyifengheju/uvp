@@ -15,7 +15,7 @@ description: "文件修改联动规则：修改文件时必须同步更新关联
 
 | # | 当你... | 必须同步更新... | 自动/手动 |
 |---|---------|----------------|----------|
-| 1 | 创建 ADR | `docs/adr/registry.md` | ✅ `uvp adr` 自动 |
+| 1 | 创建 ADR | `docs/_meta/adr-registry.yaml`（源） → `docs/adr/index.md`（渲染） | ✅ `uvp adr` 自动 |
 | 2 | 关联 Feature 到 ADR | ADR `related_features` + 正文"🎯 AI 上下文" | ❌ 手动（2处） |
 | 3 | 创建 Feature | `feature-registry.yaml` + `docs/features/index.md` | ✅ `uvp f new` 自动 |
 | 4 | **修改 src/ 代码** | **`FEAT-xxx/changelog.md`** | ❌ **手动（最重要！）** |
@@ -31,7 +31,7 @@ description: "文件修改联动规则：修改文件时必须同步更新关联
 | 9 | 更新 spec 验收标准 | 重新运行验证 |
 | 10 | 关闭 Feature | `FEAT-xxx/context.md` |
 | 11 | 关闭 Feature | `docs/PROJECT_STATE.md` |
-| 12 | 关闭 Feature | `docs/roadmap.md`（AI 语义匹配，追加 `$FEAT-xxx` 标签） |
+| 12 | 关闭 Feature | `docs/roadmap.md`（AI 语义匹配，追加 `[[FEAT-xxx]]` 标签） |
 
 ---
 

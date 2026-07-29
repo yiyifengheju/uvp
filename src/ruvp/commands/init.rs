@@ -91,9 +91,9 @@ pub fn run(
             ui::step_fail(&pb4, &format!("Failed: {e}")); std::process::exit(1);
         }
     }
-    if let Some(t) = common::load_builtin_template("adr_registry.md") {
-        ui::step_update(&pb4, "docs/adr/registry.md");
-        if let Err(e) = write_file_safe(&project_dir.join("docs/adr/registry.md"), &t.replace("{DATE}", &today())) {
+    if let Some(t) = common::load_builtin_template("adr_index.md") {
+        ui::step_update(&pb4, "docs/adr/index.md");
+        if let Err(e) = write_file_safe(&project_dir.join("docs/adr/index.md"), &t.replace("{DATE}", &today())) {
             ui::step_fail(&pb4, &format!("Failed: {e}")); std::process::exit(1);
         }
     }

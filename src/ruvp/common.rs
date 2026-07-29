@@ -151,7 +151,7 @@ pub fn get_next_adr_number(adr_dir: &Path) -> i32 {
     if let Ok(entries) = fs::read_dir(adr_dir) {
         for entry in entries.flatten() {
             let name = entry.file_name().to_string_lossy().to_string();
-            if name == "template.md" || name == "registry.md" { continue; }
+            if name == "template.md" || name == "index.md" { continue; }
             if let Some(caps) = re.captures(&name) {
                 if let Ok(n) = caps[1].parse::<i32>() {
                     max_num = max_num.max(n);
@@ -286,7 +286,7 @@ pub fn rebuild_todo_file(items: &[TodoItem], extra_lines: &[String]) -> String {
 
 /// 从 TODO 内容中提取关联的 ADR 编号
 pub fn extract_todo_adr_refs(content: &str) -> Vec<String> {
-    let re = Regex::new(r"(?i)\[ADR-(\d+)\]").unwrap();
+    let re = Regex::new(r"(?i)\[\[ADR-(\d+)\]\]").unwrap();
     re.captures_iter(content).map(|c| {
         let num: u32 = c[1].parse().unwrap_or(0);
         format!("ADR-{:03}", num)
@@ -359,7 +359,7 @@ pub struct RoadmapItem {
 }
 
 pub fn parse_roadmap(content: &str) -> Vec<RoadmapItem> {
-    let feat_re = Regex::new(r"(?:\$|\[)FEAT-(\d+)\]?").unwrap();
+    let feat_re = Regex::new(r"\[\[FEAT-(\d+)\]\]").unwrap();
     let section_re = Regex::new(r"^##\s+(.+)").unwrap();
     let item_re = Regex::new(r"^-\s+(.+)").unwrap();
     let mut items = Vec::new();
@@ -385,7 +385,7 @@ pub fn parse_roadmap(content: &str) -> Vec<RoadmapItem> {
 
 embed_templates! {
     "default.md" => "templates/default.md",
-    "adr_registry.md" => "templates/adr_registry.md",
+    "adr_index.md" => "templates/adr_index.md",
     "feature_registry.yaml" => "templates/feature_registry.yaml",
     "features_index.md" => "templates/features_index.md",
     "ai_context.md" => "templates/ai_context.md",

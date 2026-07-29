@@ -1,0 +1,53 @@
+# ADR Registry
+# 此文件由 uvp 自动维护，记录所有架构决策记录的状态
+# AI 读取此文件判断 ADR 状态和关联关系
+
+adrs:
+- id: ADR-002
+  title: 创建测试用例
+  status: accepted
+  file: 002-创建测试用例.md
+  related_features: []
+  date: 2026-06-14
+- id: ADR-003
+  title: PRD一致性审查
+  status: accepted
+  file: 0003-PRD一致性审查-冲突未完成模糊特性.md
+  related_features: []
+  date: 2026-06-16
+- id: ADR-004
+  title: uvp修复bug
+  status: accepted
+  file: 004-uvp修复bug.md
+  related_features: []
+  date: 2026-06-19
+- id: ADR-005
+  title: uvp修复obsidian功能
+  status: accepted
+  file: 005-uvp修复obsidian功能.md
+  related_features: []
+  date: 2026-06-19
+- id: ADR-006
+  title: 实践&改进
+  status: accepted
+  file: 0006-实践与改进.md
+  related_features: [FEAT-004, FEAT-009, FEAT-016, FEAT-017]
+  date: 2026-07-28
+- id: ADR-007
+  title: 细化TODO、roadmap、adr等职责
+  status: proposed
+  file: 0007-细化todoroadmapadr等职责.md
+  related_features: []
+  date: 2026-07-22
+- id: ADR-008
+  title: 适配全局看板
+  status: accepted
+  file: 0008-适配全局看板.md
+  related_features: [FEAT-019]
+  date: 2026-07-22
+- id: ADR-009
+  title: 看板体验优化
+  status: proposed
+  file: 0009-看板体验优化.md
+  related_features: [FEAT-019]
+  date: 2026-07-27

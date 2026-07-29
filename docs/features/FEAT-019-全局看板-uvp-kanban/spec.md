@@ -3,8 +3,8 @@ doc_type: feature-spec
 title: "FEAT-019: 全局看板 (uvp kanban)"
 date: 2026-07-27
 feat_id: "FEAT-019"
-status: planned
-updated: 2026-07-27
+status: implemented
+updated: 2026-07-29
 related_adr: "0007"
 ---
 
@@ -58,9 +58,9 @@ path = "G:/600_PycharmProjects/another-project"
 
 | 关联方向 | 标记格式 | 提取方式 |
 |----------|----------|----------|
-| TODO → ADR | `[ADR-xxx]` 在 TODO 内容中 | 正则 `\[ADR-(\d+)\]` |
+| TODO → ADR | `[[ADR-xxx]]` 在 TODO 内容中 | 正则 `\[\[ADR-(\d+)\]\]` |
 | ADR → Feature | front matter `related_features: [FEAT-xxx]` | YAML 解析 |
-| Feature → Roadmap | Roadmap 条目中 `$FEAT-xxx` | 正则 `\$FEAT-(\d+)` |
+| Feature → Roadmap | Roadmap 条目中 `[[FEAT-xxx]]` | 正则 `\[\[FEAT-(\d+)\]\]` |
 
 ## 行为规格
 

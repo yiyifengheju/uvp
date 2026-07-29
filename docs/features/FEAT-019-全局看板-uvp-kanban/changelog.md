@@ -21,3 +21,7 @@ updated: 2026-07-27
 | 2026-07-27 | added | Kanban 后端 REST API | commands/kanban.rs: 项目列表/概览/TODO CRUD 五个 API 端点 + 静态文件服务 |
 | 2026-07-27 | added | Kanban 前端 | web/: Svelte 5 + Vite + TailwindCSS 看板 UI，4 列布局 + SVG 连线 + 悬浮高亮 + TODO 操作 |
 | 2026-07-27 | fixed | pyproject.toml 解析 | kanban.rs: 改用 serde 结构体解析 pyproject.toml，修复 toml::Value 方式无法读取 version/description 的问题 |
+| 2026-07-29 | added | 高亮分层 (P8) | ProjectBoard.svelte: BFS 距离分层，直接关联强高亮+实线，间接关联次高亮+虚线 |
+| 2026-07-29 | changed | 标签格式统一为 Obsidian 双括号 | common.rs/kanban.rs: `[ADR-NNN]`→`[[ADR-NNN]]`，`$FEAT-NNN`→`[[FEAT-NNN]]` |
+| 2026-07-29 | changed | ADR registry 数据源重构 | render.rs/adr.rs: yaml-first 流程，adr-registry.yaml 为源，index.md 为渲染产物 |
+| 2026-07-29 | closed | 特性闭环 | 所有验收标准通过，标记为 implemented |

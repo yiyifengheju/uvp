@@ -47,7 +47,7 @@ AI 在执行任务时，修改某些文件必须同步修改关联文件：
 
 | 触发动作 | 必须同步修改 | 说明 |
 |----------|-------------|------|
-| 创建 ADR | docs/adr/registry.md | 注册新 ADR |
+| 创建 ADR | docs/_meta/adr-registry.yaml（源） → docs/adr/index.md（渲染） | 注册新 ADR |
 | 创建 Feature | feature-registry.yaml, docs/features/index.md | 注册新特性 |
 | 修改 src/ 代码 | FEAT-xxx/changelog.md | 记录变更 |
 | 修改 src/ 代码 | FEAT-xxx/spec.md（如接口变化） | 保持 spec 与代码一致 |
@@ -106,4 +106,4 @@ AI 在执行任务时，修改某些文件必须同步修改关联文件：
 - FEAT-016: Feature 生命周期模板 (uvp-feature-lifecycle skill) (implemented)
 - FEAT-017: 文件修改联动规则 (uvp-file-coupling skill) (implemented)
 - FEAT-018: 周报生成 (uvp-weekly-report skill) (implemented)
-- FEAT-019: 全局看板 (uvp kanban) (planned)
+- FEAT-019: 全局看板 (uvp kanban) (implemented)

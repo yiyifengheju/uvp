@@ -307,18 +307,18 @@ updated: "YYYY-MM-DD"
 
 1. **理解 Feature 语义**：阅读被关闭 Feature 的 `spec.md` 和 `context.md`
 2. **匹配 Roadmap 条目**：打开 `docs/roadmap.md`，根据 Feature 的功能语义，判断应该关联到哪个里程碑条目
-3. **更新 Roadmap**：将 `$FEAT-XXX` 标签追加到对应的 roadmap 条目末尾
+3. **更新 Roadmap**：将 `[[FEAT-XXX]]` 标签追加到对应的 roadmap 条目末尾
 4. **格式示例**：
    ```markdown
    ## 近期目标
    
-   - 完成项目初始化功能 $FEAT-001 $FEAT-002
-   - 补充测试用例 $FEAT-003
+   - 完成项目初始化功能 [[FEAT-001]] [[FEAT-002]]
+   - 补充测试用例 [[FEAT-003]]
    ```
 
 **关键原则**：
 - Roadmap 是纯列表形式（无 checkbox），呈现的是里程碑目标
-- 一个 Feature 对应的 `$FEAT-XXX` 标签可能关联到多个里程碑条目（如果该 Feature 贡献到多个目标）
+- 一个 Feature 对应的 `[[FEAT-XXX]]` 标签可能关联到多个里程碑条目（如果该 Feature 贡献到多个目标）
 - 如果没有匹配的 roadmap 条目，可以跳过或新建一个条目（可选）
 
 ---

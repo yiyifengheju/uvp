@@ -31,5 +31,7 @@ target/
 .claude/
 docs/ADR/
 docs/PRD/
+docs/features/
+docs/开发记录/
 docs/wechat/
 

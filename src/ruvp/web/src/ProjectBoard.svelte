@@ -108,7 +108,7 @@
   }
 
   function stripAdrTags(text) {
-    return text.replace(/\s*\[ADR-\d+\]/gi, '').trim();
+    return text.replace(/\s*\[\[ADR-\d+\]\]/gi, '').trim();
   }
 
   function handleNodeClick(e, nodeKey) {

@@ -152,6 +152,7 @@ fn render_adr_registry(project_dir: &Path, cfg: &config::UvpConfig, check_only: 
         return true;
     }
 
+    // Step 1: Scan ADR files → build entries
     let mut entries: Vec<(String, String, String, String, String, String)> = Vec::new();
 
     if let Ok(files) = fs::read_dir(&adr_dir) {
@@ -160,7 +161,7 @@ fn render_adr_registry(project_dir: &Path, cfg: &config::UvpConfig, check_only: 
 
         for f in &file_list {
             let name = f.file_name().to_string_lossy().to_string();
-            if !name.ends_with(".md") || name == "template.md" || name == "registry.md" {
+            if !name.ends_with(".md") || name == "template.md" || name == "index.md" {
                 continue;
             }
             let content = match fs::read_to_string(f.path()) {
@@ -202,15 +203,50 @@ fn render_adr_registry(project_dir: &Path, cfg: &config::UvpConfig, check_only: 
         }
     }
 
+    // Step 2: Write adr-registry.yaml (single source of truth)
+    let yaml_path = project_dir.join("docs/_meta/adr-registry.yaml");
+    let mut yaml_lines = vec![
+        "# ADR Registry".to_string(),
+        "# 此文件由 uvp 自动维护，记录所有架构决策记录的状态".to_string(),
+        "# AI 读取此文件判断 ADR 状态和关联关系".to_string(),
+        String::new(),
+        "adrs:".to_string(),
+    ];
+
+    for (number, filename, title, status, feat_ref, date_str) in &entries {
+        yaml_lines.push(format!("- id: ADR-{number}"));
+        yaml_lines.push(format!("  title: {title}"));
+        yaml_lines.push(format!("  status: {status}"));
+        yaml_lines.push(format!("  file: {filename}"));
+        let features: Vec<&str> = if feat_ref == "-" {
+            vec![]
+        } else {
+            feat_ref.split(',').map(|s| s.trim()).filter(|s| !s.is_empty()).collect()
+        };
+        yaml_lines.push(format!("  related_features: [{}]", features.join(", ")));
+        yaml_lines.push(format!("  date: {date_str}"));
+    }
+
+    let yaml_content = yaml_lines.join("\n") + "\n";
+
+    if !check_only {
+        if let Err(e) = fs::write(&yaml_path, &yaml_content) {
+            ui::action_fail(&format!("adr-registry.yaml 写入失败: {e}"));
+            return false;
+        }
+        ui::action_ok("已生成: docs/_meta/adr-registry.yaml");
+    }
+
+    // Step 3: Render index.md from the same data (rendered output)
     let mut status_count: std::collections::HashMap<String, i32> = std::collections::HashMap::new();
     for (_, _, _, status, _, _) in &entries {
         *status_count.entry(status.clone()).or_insert(0) += 1;
     }
 
-    let registry_path = adr_dir.join("registry.md");
+    let index_path = adr_dir.join("index.md");
 
     let today = if check_only {
-        extract_date_from_file(&registry_path).unwrap_or_else(|| Local::now().format("%Y-%m-%d").to_string())
+        extract_date_from_file(&index_path).unwrap_or_else(|| Local::now().format("%Y-%m-%d").to_string())
     } else {
         Local::now().format("%Y-%m-%d").to_string()
     };
@@ -221,9 +257,10 @@ fn render_adr_registry(project_dir: &Path, cfg: &config::UvpConfig, check_only: 
         "title: \"ADR Registry\"".to_string(),
         format!("date: {today}"),
         "auto_generated: true".to_string(),
-        "source: adr-directory-scan".to_string(),
+        "source: adr-registry.yaml".to_string(),
         "---".to_string(),
         String::new(),
+        "<!-- 此文件由 uvp render 自动生成，不应手动编辑 -->\n".to_string(),
         "# ADR Registry\n".to_string(),
         "## 状态概览\n".to_string(),
         "| 状态 | 数量 |".to_string(),
@@ -259,33 +296,29 @@ fn render_adr_registry(project_dir: &Path, cfg: &config::UvpConfig, check_only: 
     let expected_content = lines.join("\n") + "\n";
 
     if check_only {
-        if registry_path.exists() {
-            match fs::read_to_string(&registry_path) {
+        if index_path.exists() {
+            match fs::read_to_string(&index_path) {
                 Ok(current) if current == expected_content => {
-                    ui::action_ok("docs/adr/registry.md 一致");
-                    return true;
+                    ui::action_ok("docs/adr/index.md 一致");
                 }
                 _ => {
-                    ui::action_fail("docs/adr/registry.md 不一致");
+                    ui::action_fail("docs/adr/index.md 不一致");
                     return false;
                 }
             }
         } else {
-            ui::action_fail("docs/adr/registry.md 不存在");
+            ui::action_fail("docs/adr/index.md 不存在");
             return false;
         }
     } else {
-        match fs::write(&registry_path, &expected_content) {
-            Ok(_) => {
-                ui::action_ok("已渲染: docs/adr/registry.md");
-                return true;
-            }
-            Err(e) => {
-                ui::action_fail(&format!("写入失败: {e}"));
-                return false;
-            }
+        if let Err(e) = fs::write(&index_path, &expected_content) {
+            ui::action_fail(&format!("写入失败: {e}"));
+            return false;
         }
+        ui::action_ok("已渲染: docs/adr/index.md");
     }
+
+    true
 }
 
 fn extract_date_from_file(path: &Path) -> Option<String> {

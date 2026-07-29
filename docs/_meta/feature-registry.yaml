@@ -131,8 +131,8 @@ features:
   updated: 2026-06-19
 - id: FEAT-019
   title: 全局看板 (uvp kanban)
-  status: implementing
+  status: implemented
   directory: docs/features/FEAT-019-全局看板-uvp-kanban
   adr: '0007'
   created: 2026-07-27
-  updated: 2026-07-27
+  updated: 2026-07-29

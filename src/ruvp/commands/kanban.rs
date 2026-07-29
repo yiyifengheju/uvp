@@ -433,7 +433,7 @@ fn read_adrs(project_dir: &Path, cfg: &config::UvpConfig) -> Vec<AdrView> {
     if let Ok(entries) = fs::read_dir(&adr_dir) {
         for entry in entries.flatten() {
             let name = entry.file_name().to_string_lossy().to_string();
-            if !name.ends_with(".md") || name == "template.md" || name == "registry.md" {
+            if !name.ends_with(".md") || name == "template.md" || name == "index.md" {
                 continue;
             }
             if let Ok(content) = fs::read_to_string(entry.path()) {
@@ -474,12 +474,12 @@ fn read_roadmap(project_dir: &Path) -> Vec<RoadmapView> {
     Vec::new()
 }
 
-/// Normalize [adr-1], [Adr-01], [ADR-001] etc. → [ADR-001]
+/// Normalize [[adr-1]], [[Adr-01]], [[ADR-001]], [adr-1], [ADR-001] etc. → [[ADR-001]]
 fn normalize_adr_tags(content: &str) -> String {
-    let re = Regex::new(r"(?i)\[adr-(\d+)\]").unwrap();
+    let re = Regex::new(r"(?i)\[?\[adr-(\d+)\]\]?").unwrap();
     re.replace_all(content, |caps: &regex::Captures| {
         let num: u32 = caps[1].parse().unwrap_or(0);
-        format!("[ADR-{:03}]", num)
+        format!("[[ADR-{:03}]]", num)
     }).to_string()
 }
 

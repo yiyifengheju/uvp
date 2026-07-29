@@ -8,7 +8,7 @@
 
 - **项目名称**：ai-uvp
 - **当前阶段**：Beta
-- **最后更新**：2026-07-27
+- **最后更新**：2026-07-29
 
 ## 技术栈
 
@@ -41,7 +41,7 @@
 | FEAT-016 | Feature 生命周期模板 (uvp-feature-lifecycle skill) | implemented | 2026-06-19 |
 | FEAT-017 | 文件修改联动规则 (uvp-file-coupling skill) | implemented | 2026-06-19 |
 | FEAT-018 | 周报生成 (uvp-weekly-report skill) | implemented | 2026-06-19 |
-| FEAT-019 | 全局看板 (uvp kanban) | implementing | 2026-07-27 |
+| FEAT-019 | 全局看板 (uvp kanban) | implemented | 2026-07-29 |
 
 ## 系统架构
 

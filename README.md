@@ -153,9 +153,9 @@ uvp kanban → 全局看板（跨项目 TODO/Feature/ADR/Roadmap 聚合）
 TODO → ADR → Feature → Roadmap
 ```
 
-- TODO 通过 `[ADR-NNN]` 标记关联决策
+- TODO 通过 `[[ADR-NNN]]` 标记关联决策
 - ADR 通过 `related_features` 关联特性
-- Feature 闭环后由 AI 语义匹配写入 Roadmap
+- Feature 闭环后由 AI 语义匹配写入 Roadmap（`[[FEAT-NNN]]` 标签）
 
 ## CLI 命令
 
