@@ -59,6 +59,11 @@ main() {
     curl -fsSL "$url" -o "${INSTALL_DIR}/uvp"
     chmod +x "${INSTALL_DIR}/uvp"
 
+    # macOS: remove quarantine attribute to avoid Gatekeeper block
+    if [ "$(uname -s)" = "Darwin" ]; then
+        xattr -cr "${INSTALL_DIR}/uvp" 2>/dev/null || true
+    fi
+
     echo "[OK] Installed: ${INSTALL_DIR}/uvp"
     echo ""
 

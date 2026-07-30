@@ -62,6 +62,10 @@ jobs:
         shell: bash
         run: cp "${{ env.CARGO_DIR }}/target/${{ matrix.target }}/release/${{ matrix.binary }}" "${{ matrix.artifact }}"
 
+      - name: Ad-hoc code sign (macOS)
+        if: runner.os == 'macOS'
+        run: codesign --force --sign - "${{ matrix.artifact }}"
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
